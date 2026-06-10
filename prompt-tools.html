@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 提示词工具箱</title>
+<style>
+  /* ===== CSS 变量：浅色主题 ===== */
+  :root {
+    --bg: #f7f5fb;
+    --bg-secondary: #ffffff;
+    --text: #2b2438;
+    --text-muted: #6e6480;
+    --primary: #7c5cff;
+    --primary-light: #a78bfa;
+    --primary-dark: #5b3df5;
+    --card-bg: #ffffff;
+    --card-border: rgba(124, 92, 255, 0.12);
+    --shadow: rgba(124, 92, 255, 0.15);
+    --tag-bg: rgba(124, 92, 255, 0.1);
+    --transition: 0.3s ease;
+  }
+
+  /* ===== CSS 变量：深色主题 ===== */
+  [data-theme="dark"] {
+    --bg: #14101f;
+    --bg-secondary: #1d1830;
+    --text: #ece8f7;
+    --text-muted: #a89cc4;
+    --primary: #a78bfa;
+    --primary-light: #c4b5fd;
+    --primary-dark: #7c5cff;
+    --card-bg: #1d1830;
+    --card-border: rgba(167, 139, 250, 0.18);
+    --shadow: rgba(124, 92, 255, 0.25);
+    --tag-bg: rgba(167, 139, 250, 0.15);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background var(--transition), color var(--transition);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== 导航栏 ===== */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--card-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background var(--transition), border-color var(--transition);
+  }
+
+  .navbar .logo {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary);
+  }
+
+  .theme-toggle {
+    background: var(--tag-bg);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .theme-toggle:hover {
+    transform: scale(1.1);
+  }
+
+  /* ===== 主体容器 ===== */
+  .container {
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+    flex: 1;
+  }
+
+  /* ===== 页面标题区 ===== */
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  /* ===== 搜索框 ===== */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    border-radius: 999px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--tag-bg);
+  }
+
+  /* ===== 分类 Tab ===== */
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    /* 隐藏滚动条 */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: none;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ===== 卡片网格 ===== */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    animation: fadeIn 0.35s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ===== 提示词卡片 ===== */
+  .card {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    overflow: hidden;
+    transition: transform var(--transition), box-shadow var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* 顶部紫色渐变线条，hover 时出现 */
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px var(--shadow);
+  }
+
+  .card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .card-template {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* 模板文字：默认限制3行显示，可展开/收起 */
+  .card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .card-text.expanded {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+  }
+
+  /* ===== 展开/收起按钮 ===== */
+  .expand-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.2s;
+  }
+
+  .expand-btn:hover {
+    opacity: 0.7;
+  }
+
+  /* 按钮行：展开按钮 + 复制按钮 */
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: auto;
+  }
+
+  /* 占位符高亮 */
+  .placeholder {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  /* ===== 复制按钮 ===== */
+  .copy-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  .copy-btn:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .copy-btn.copied {
+    background: #4caf50;
+    color: #fff;
+  }
+
+  /* ===== 无结果提示 ===== */
+  .no-result {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 60px 0;
+    font-size: 15px;
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+  <!-- 导航栏 -->
+  <div class="navbar">
+    <div class="logo">🧩 提示词工具箱</div>
+    <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+  </div>
+
+  <div class="container">
+    <!-- 页面标题区 -->
+    <div class="page-header">
+      <h1>AI 提示词工具箱</h1>
+      <p>为大学生场景整理的提示词模板，点击复制直接使用</p>
+    </div>
+
+    <!-- 搜索框 -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="搜索提示词标题或内容...">
+    </div>
+
+    <!-- 分类 Tab -->
+    <div class="tabs" id="tabs"></div>
+
+    <!-- 卡片区域 -->
+    <div class="card-grid" id="cardGrid"></div>
+  </div>
+
+  <footer>© 2026 Cyrilla · AI提示词工具箱</footer>
+
+<script>
+  // ===================== 数据部分 =====================
+  const data = {
+    writing: {
+      label: "✍️ 写作",
+      items: [
+        { title: "论文大纲生成", template: "我正在写一篇关于【主题】的【论文类型，如学术论文/调研报告/课程论文】，目标读者是【读者群体】，全文预计【字数】字。请帮我生成一份详细大纲，要求：①包含引言、主体（分章节）、结论三大部分；②每个章节给出标题和2-3个主要论点或子问题；③标注各部分建议占比或字数；④在大纲末尾提示可能需要补充的数据或文献类型。" },
+        { title: "段落润色", template: "请润色以下段落。要求：①保持原意和逻辑结构不变；②语言流畅自然，去除口语化表达；③专业术语使用准确，不堆砌；④修正语病和表达不清之处；⑤润色完成后附一句说明，指出主要改动了什么。原文如下：【粘贴原文】" },
+        { title: "摘要压缩", template: "请将以下内容压缩为一段摘要。要求：①控制在【字数，如150】字以内；②保留核心论点、关键数据和结论，不丢失主要信息；③不使用'本文'之外的主观评价性语言；④逻辑连贯，可独立阅读理解。原文如下：【粘贴原文】" },
+        { title: "邮件撰写", template: "请帮我写一封邮件。背景信息：①收件人身份是【收件人身份，如导师/同学/企业HR】；②邮件目的是【邮件目的】；③语气要求【正式/亲切】，整体风格【正式/友好】；④需要包含的关键信息有：【关键信息要点】。输出要求：包含称呼、正文（不超过【字数】字）、结尾敬语和落款，格式规范、礼貌得体。" },
+        { title: "读书笔记整理", template: "以下是我读《【书名】》时记录的零散笔记，请帮我整理成结构清晰的读书笔记。要求：①分为'核心观点'（3-5条，每条配一句解释）、'金句摘录'（标注页码或章节，如有）、'个人启发'（结合我的专业【专业/方向】写2-3点思考）三个部分；②使用小标题分隔；③语言简洁、避免重复原文表述。笔记内容：【粘贴笔记】" },
+        { title: "议论文写作", template: "请以【观点/论题】为核心，写一篇议论文。要求：①字数约【字数，如600】字；②结构为'引入—论证—反驳—总结'四段式，每段之间过渡自然；③至少使用2个具体论据（事实、数据或案例均可）支撑论点；④主动设想一个反方观点并予以回应；⑤语言风格【严谨/犀利/平实】，结尾给出明确的总结性结论。" },
+        { title: "文章标题生成", template: "我写了一篇关于【文章主题】的文章，核心内容是【一句话概括】，目标发布平台是【平台，如公众号/知乎/学校官网】。请生成5个标题，要求：①风格为【严肃学术/轻松活泼/新媒体风格】；②每个标题不超过【字数，如20】字；③至少2个标题包含具体数字或关键词以增强吸引力；④逐一说明每个标题的设计思路（一句话即可）。" },
+        { title: "个人陈述撰写", template: "请帮我写一段个人陈述，用于【申请目的，如保研/出国/实习申请】。我的背景：专业【专业】，主要经历【经历1、经历2】，特长/亮点【特长描述】，申请目标是【目标院校/项目/岗位】。要求：①字数控制在【字数】字以内；②结构包含'个人定位—关键经历与成果—与申请方向的契合点—未来规划'四部分；③语言真诚、有逻辑，避免空洞的形容词堆砌；④结尾呼应申请动机，体现诚意。" },
+        { title: "社交文案创作", template: "请为我的【平台，如小红书/朋友圈/微博】写一条文案。主题是【内容主题】，配合场景是【场景，如分享照片/记录日常/宣传活动】。要求：①风格【活泼/温暖/专业】，符合该平台的语言习惯；②字数控制在【字数，如100】字以内（朋友圈/微博）或【字数，如300】字左右（小红书）；③包含1-2个emoji和3-5个相关标签（话题标签）；④结尾设置一个互动引导（提问、call to action等）。" },
+        { title: "公众号推文写作", template: "请帮我写一篇公众号推文。主题是【主题】，目标受众是【受众群体，如本校学生】，写作目的是【目的，如分享经验/活动宣传/知识科普】。要求：①包含吸引人的标题和开头钩子（前50字内抓住注意力）；②正文分3-5个小节，每节配小标题；③语言风格【轻松幽默/专业干货/温暖治愈】；④全文【字数】字左右；⑤结尾附一句总结+互动引导（如留言/转发提示）。" },
+        { title: "感谢信/道歉信撰写", template: "请帮我写一封【感谢信/道歉信】。背景：写给【对象，如老师/朋友/合作方】，事由是【具体事件】，希望表达的核心情感是【核心情感，如感激/歉意+改进态度】。要求：①语气真诚、不浮夸，避免套话堆砌；②如是道歉信，需明确说明问题所在、造成的影响、改进措施三部分；③如是感谢信，需具体说明对方帮助的内容和带来的影响；④字数控制在【字数】字以内，结尾礼貌得体。" },
+        { title: "文本降重改写", template: "请帮我对以下文本进行改写降重。要求：①保持原意、逻辑顺序和关键信息完全不变；②替换同义词、调整句式结构（如主动改被动、长句拆分或合并）；③不得使用机器翻译式的生硬表达，改写后需通顺自然；④输出后附一句说明，标注改写比例大致达到多少（如'约70%语句结构已调整'）。原文：【粘贴原文】" },
+        { title: "写作风格仿写", template: "请模仿【目标风格，如鲁迅/某作家/某博主】的写作风格，围绕主题【主题】写一段文字。要求：①体现该风格典型的句式特点、用词习惯和语气（先用一句话说明你识别到的风格特征）；②字数约【字数】字；③内容要有实际信息量，不能只是空洞的风格模仿；④如果素材不足，可基于以下内容改写：【粘贴素材，可选】" },
+        { title: "内容续写", template: "请根据以下已有内容进行续写。要求：①延续原文的风格、人称视角和叙事节奏，不出现风格突变；②续写部分约【字数】字；③情节/逻辑需合理衔接，不能与前文设定矛盾；④如果是故事类内容，结尾留一个悬念或为下一段做铺垫；如果是说明类内容，结尾需自然收束本段话题。已有内容：【粘贴已有内容】" },
+        { title: "中英翻译润色", template: "请将以下【中文/英文】内容翻译成【目标语言】，并对译文进行润色。要求：①忠实于原文意思，不漏译、不增译；②译文符合目标语言的表达习惯，避免直译腔；③专业术语准确（如涉及【领域】专业内容，请使用该领域通用译法）；④翻译完成后，列出2-3处你认为处理得比较巧妙或需要特别注意的地方并说明原因。原文：【粘贴原文】" }
+      ]
+    },
+    learning: {
+      label: "📚 学习",
+      items: [
+        { title: "概念通俗解释", template: "请用最简单的语言解释【概念/术语】。要求：①假设我是一个完全没有相关背景的人，避免使用未解释的专业词汇；②用1-2个生活化的类比或例子帮助理解；③先给出一句话核心定义，再展开详细说明；④最后用一句话总结这个概念'最重要的一点是什么'。" },
+        { title: "知识点对比", template: "请对比【概念A】和【概念B】。要求：①从'定义'、'应用场景'、'优缺点'三个维度分别说明，建议用表格形式呈现；②指出两者容易混淆的地方，并说明区分技巧；③最后用一句话总结二者最核心的区别；④如果属于【学科领域】，请结合该学科的典型例题或场景举例说明。" },
+        { title: "出题自测", template: "我正在复习【学科/章节】，以下是相关知识点，请帮我出题自测。要求：①出【题目数量，如5】道【选择题/简答题/计算题】；②题目难度【基础/中等/较难】，覆盖知识点的不同角度；③每题附上正确答案；④每题给出详细解析，说明解题思路和易错点。知识点：【粘贴知识点】" },
+        { title: "错题分析", template: "我在做题时遇到了这道题，请帮我分析错因。题目：【粘贴题目】；我的答案：【我的答案】；正确答案：【正确答案】。要求：①指出我的解题思路错在哪一步，分析可能的认知误区；②讲解正确的解题思路，分步骤说明；③总结这类题目的通用解法或注意事项；④推荐1-2道同类型题目供我巩固（可以是描述性的题目方向）。" },
+        { title: "学习计划制定", template: "我需要在【时间段，如2周内】掌握【学习内容】，目前基础是【当前水平，如零基础/有一定基础】，每天可用时间约【小时数】小时。请帮我制定学习计划，要求：①按天或按周拆解学习任务，明确每个阶段的具体目标；②标注每项任务建议用时；③穿插复习和自测环节，避免只学新内容；④给出1-2条适合我这种基础水平的学习方法建议；⑤以表格或清单形式呈现，便于打卡。" },
+        { title: "论文文献综述", template: "请帮我梳理关于【研究主题】的文献综述。要求：①按时间脉络或研究流派划分，介绍该领域的发展历程；②归纳3-4个主要研究方向，每个方向说明代表性观点和研究方法；③指出当前研究热点和尚存的争议或空白；④结尾用一段话总结该领域未来可能的研究趋势；⑤语言学术化，避免口语表达。" },
+        { title: "公式原理讲解", template: "请详细讲解【公式/定理名称】。要求：①说明该公式的提出背景和要解决的问题；②给出推导过程，关键步骤需写出公式并解释每一步的依据；③说明适用条件和使用时的常见限制；④举一个具体的实际例子，代入数字演示如何使用该公式；⑤用一句话总结记忆这个公式的小技巧。" },
+        { title: "思维导图大纲", template: "请将以下内容整理成思维导图的文字大纲。要求：①核心主题为【主题】，作为第一级；②按逻辑关系（并列、递进、因果等）划分二级、三级分支，用缩进表示层级；③每个分支用简短的关键词或短语概括，不要整句话；④分支数量适中（每级建议3-5个），避免信息过载；⑤如果原内容有遗漏的逻辑关系，请适当补充。内容：【粘贴内容】" },
+        { title: "英语长难句分析", template: "请分析以下英语长难句。要求：①划分句子的主句和从句，标注各从句的类型（定语从句/状语从句/宾语从句等）；②标注主要的修饰成分（介词短语、分词短语等）及其修饰对象；③给出准确、通顺的中文翻译；④指出这句话的语法难点或容易理解错的地方，给出避坑提示。句子：【粘贴句子】" },
+        { title: "课堂笔记整理", template: "以下是我的课堂笔记原始记录（可能比较零散），请帮我整理。要求：①按知识点逻辑重新组织结构，分清主次（用标题、子标题、要点列表呈现）；②补充必要的逻辑连接词，使内容连贯；③标注出哪些是老师强调的重点（如笔记中有标注的话）；④在末尾列出2-3个可能需要课后进一步查阅或提问的疑点。原始笔记：【粘贴笔记】" },
+        { title: "知识点框架梳理", template: "请帮我梳理【学科/章节】的知识框架。要求：①按照'总—分'结构呈现，先给出该章节的整体逻辑脉络（一段话概述）；②再分模块列出各知识点，标注模块之间的关联关系；③对每个知识点用一句话说明其核心内容或考查方式；④标记出哪些是基础必会内容、哪些是易错或拓展内容。" },
+        { title: "背诵记忆法设计", template: "我需要背诵以下内容，请帮我设计记忆方法。内容：【粘贴需要背诵的内容】。要求：①根据内容特点（如条目较多/逻辑性强/需要精确记忆原文）选择合适的记忆法（如口诀法、联想记忆、思维导图记忆等）并说明理由；②给出具体的记忆方案示例（如编一个口诀或联想故事）；③建议合理的复习间隔安排（如按艾宾浩斯曲线）；④提示哪些部分容易混淆，需要重点区分记忆。" },
+        { title: "论文润色与查重建议", template: "请帮我审阅以下论文片段。要求：①检查语言表达是否学术化、是否存在口语化或不严谨的表述，并给出修改建议；②检查逻辑连贯性，指出论证中可能的薄弱环节；③标注可能存在查重风险的表述方式（如直接照搬教材或常见说法的句子），并给出改写建议；④不改变原文的核心观点和数据。论文片段：【粘贴片段】" },
+        { title: "学科答疑", template: "我在学习【学科/课程】时遇到一个问题，请帮我解答。问题描述：【具体问题】，我目前的理解是：【我的理解，可选】。要求：①先判断我的理解是否有偏差，如有请指出错在哪里；②给出清晰、分步骤的解答过程；③补充1个相关的知识点或易混淆点，帮助我建立更完整的认知；④用通俗的语言总结这个问题的核心结论。" },
+        { title: "复习重点提炼", template: "以下是【学科/章节】的复习材料，请帮我提炼复习重点。要求：①按重要程度分为'核心必考'、'重要补充'、'了解即可'三个等级；②每个知识点用一句话概括考查角度；③标注哪些知识点之间有关联，建议放在一起复习；④最后给出一份'考前最后冲刺'清单，列出最该花时间复习的5项内容。复习材料：【粘贴材料】" }
+      ]
+    },
+    ppt: {
+      label: "📊 PPT·汇报",
+      items: [
+        { title: "PPT框架生成", template: "我需要做一份关于【主题】的PPT，汇报对象是【受众，如老师/评委/公司领导】，时长约【分钟】分钟。请帮我生成PPT框架，要求：①包含封面、目录、正文（分章节）、总结/展望、致谢/Q&A共五大部分；②正文部分给出每页的标题和2-3个核心要点（用简短短语，不要整段文字）；③标注每个章节建议的页数和讲解时长；④在框架末尾提示哪些页面适合配图表或数据可视化。" },
+        { title: "开场白撰写", template: "请帮我写一段PPT汇报的开场白。主题是【汇报主题】，受众是【受众，如老师/评委/同学】。要求：①时长约30秒（约80-100字）；②风格【正式/活泼】；③包含'问候—引入主题的钩子（提问/数据/小故事均可）—说明本次汇报将讲什么'三个部分；④语言自然，适合口头表达，避免书面化长句。" },
+        { title: "数据解读文案", template: "以下是一组数据，请帮我转化为适合PPT展示的文字描述。要求：①先用一句话点明这组数据最重要的发现或结论；②再分点说明数据中的关键趋势、对比或异常值；③语言简洁，每条不超过【字数，如25】字，适合直接放在PPT页面上；④如有可能，给出1条配图建议（如适合用柱状图/折线图/饼图展示）。数据：【粘贴数据】" },
+        { title: "演讲稿撰写", template: "请根据以下PPT大纲，帮我写一份完整的演讲稿。要求：①语言自然流畅，符合口头表达习惯（可适当使用'大家可以看到'、'接下来'等过渡语）；②按大纲顺序逐页撰写讲解内容，标注对应页码；③总时长约【分钟】分钟（按每分钟约200字估算）；④在容易出现专业术语的地方，补充一句通俗解释；⑤结尾设计一句有记忆点的总结。PPT大纲：【粘贴PPT大纲】" },
+        { title: "页面文字精简", template: "请将以下内容精简为适合PPT页面展示的要点。要求：①每条不超过【字数，如20】字，最多【数量，如5】条；②保留最核心的信息，去除修饰性、解释性的语句；③尽量使用平行结构（如都以动词开头或都是名词短语），保持格式统一；④如果原内容包含数据，优先保留数据。原文：【粘贴原文】" },
+        { title: "答辩问题准备", template: "我即将进行【答辩类型，如毕业答辩/项目汇报】，主题是【主题】，核心内容包括【简要介绍研究内容/项目内容】。请帮我预测评委可能提出的问题，要求：①给出【数量，如5-8】个问题，覆盖'研究方法/创新点/局限性/实际应用/数据来源'等常见角度；②每个问题给出参考回答思路（要点式即可，不需要写完整回答）；③标注哪些问题属于'高频必问'，需要重点准备。" },
+        { title: "项目介绍一页纸", template: "请帮我将以下项目信息整理成一页纸的项目介绍（One-pager）。要求：①包含'项目背景/痛点'、'核心功能或方案'、'亮点与创新点'、'成果或数据支撑'四个板块；②语言简洁有力，每个板块控制在【字数，如50】字以内；③突出与同类项目的差异化优势；④适当使用数字或关键词加粗强调。项目信息：【粘贴项目信息】" },
+        { title: "结尾总结撰写", template: "请为我的PPT写一段结尾总结。主题是【汇报主题】。要求：①时长约20秒（约50-60字）；②结构为'回顾核心观点（1-2句）—提出展望或建议（1句）—一句有力的话收尾'；③语言精炼、有感染力，避免重复正文已经说过的细节；④如适用，可以呼应开场白中提出的钩子，形成首尾呼应。" },
+        { title: "PPT配色与设计建议", template: "我正在制作一份关于【主题】的PPT，目标风格是【风格，如简约商务/学术严谨/活泼可爱】，使用场景是【场景，如课堂汇报/企业路演】。请给出设计建议，要求：①推荐一套配色方案（给出3-4个具体颜色及大致用途，如主色/辅助色/强调色）；②说明字体搭配建议（标题字体与正文字体）；③给出2-3条版式排版的注意事项（如留白、对齐、信息密度）；④提示哪些常见设计错误需要避免。" },
+        { title: "图表选择建议", template: "我有以下数据需要在PPT中展示：【描述数据内容，如'近5年某指标的变化趋势'】。请帮我建议合适的图表形式，要求：①推荐1-2种最适合的图表类型（如折线图/柱状图/饼图/雷达图等）并说明理由；②说明图表的横纵轴或维度应该如何设置；③提示需要重点突出的数据点应该如何在图表中强调（如标注、变色等）；④如果数据不适合用图表展示，请说明原因并给出替代呈现方式。" },
+        { title: "小组汇报分工方案", template: "我们小组共【人数】人，需要完成关于【主题】的小组汇报，包含【列出已知的任务模块，如资料调研/PPT制作/演讲/答辩】。请帮我制定分工方案，要求：①根据任务量合理分配每个人的工作内容，尽量均衡；②列出每项任务的关键时间节点（如PPT初稿完成时间、彩排时间等）；③说明各部分之间需要协作或交接的环节；④给出1条提升小组汇报整体性和连贯性的建议。" },
+        { title: "汇报逐字稿转提纲", template: "以下是我写的汇报逐字稿，请帮我转换成提纲形式，方便我脱稿讲述。要求：①按原文逻辑顺序，将每个段落提炼为一个核心关键词或短语（不超过8字）；②保留必要的数字、专有名词等容易遗忘的细节作为提示词；③用层级结构呈现（一级要点+二级细节）；④标注出哪些地方需要重点强调或放慢语速。逐字稿：【粘贴逐字稿】" },
+        { title: "双语PPT翻译", template: "请将以下PPT文字内容翻译成【目标语言，如英文】，用于双语PPT。要求：①翻译需简洁，符合PPT展示习惯（短语化，避免完整长句）；②专业术语使用该领域国际通用表达；③保持与中文原文的格式对应（如标题对标题、要点对要点），方便后续排版；④如某些中文表达没有直接对应译法，请给出意译并标注。原文：【粘贴PPT文字】" },
+        { title: "汇报时间控制建议", template: "我的汇报内容如下（或大纲），总时长要求是【分钟】分钟，但目前预估时长是【预估时长】。请帮我调整，要求：①指出哪些部分内容可以精简或合并，哪些是核心不能删减；②给出每个部分建议分配的时间（精确到分钟）；③如果时间严重超出，给出一个'精简版'内容方案；④提示语速和停顿对时间控制的影响，给出practical建议。汇报内容/大纲：【粘贴内容】" },
+        { title: "汇报反馈与改进建议", template: "以下是我的PPT内容/演讲稿，目标受众是【受众】，请帮我评估并给出改进建议。要求：①从'内容逻辑'、'语言表达'、'呈现效果'三个维度分别评价，指出优点和不足；②针对每个不足给出具体的修改建议（不只是指出问题）；③评估整体是否能在【分钟】分钟内讲完，是否需要增减内容；④给出一条最优先需要修改的建议。内容：【粘贴内容】" }
+      ]
+    },
+    creative: {
+      label: "💡 创意",
+      items: [
+        { title: "头脑风暴", template: "关于【问题/主题】，请帮我进行头脑风暴。要求：①给出【数量，如10】个尽可能多样化的创意方向，覆盖不同角度（如功能、形式、受众、场景等）；②不需要考虑可行性，越有创意越好，鼓励'天马行空'的想法；③每个创意用一句话说明核心思路；④最后从中挑出2-3个相对可落地的方向，简单说明落地的第一步可以做什么。" },
+        { title: "活动策划方案", template: "请帮我策划一个【活动类型，如班级聚会/社团活动/线上活动】。基本信息：参与人数约【人数】人，预算约【预算】，主题是【活动主题】，时间地点【时间地点，如有】。请给出完整方案，要求：①包含活动目的、流程安排（分时间段列出环节及时长）、所需物料/道具清单、预算分配建议；②至少设计1个有特色、能调动气氛的环节；③提示可能遇到的风险（如天气、人数变化）及应对预案；④以清晰的结构呈现，方便直接执行。" },
+        { title: "爆款标题生成", template: "请为以下内容生成适合发布的标题。内容主题是【主题】，目标受众是【受众群体】，发布平台是【平台，如小红书/B站/公众号/抖音】。要求：①生成【数量，如10】个标题，风格符合该平台的爆款规律（如悬念式、数字式、对比式、情绪共鸣式等，尽量覆盖多种类型）；②每个标题不超过该平台常见字数限制；③标注每个标题使用了哪种'钩子'技巧；④从中推荐1个你认为最适合的标题并说明理由。" },
+        { title: "故事开头创作", template: "请为我写一个吸引人的故事开头。要求：①类型是【故事类型，如悬疑/青春/科幻/治愈】；②主角设定为【主角设定】，故事背景/场景为【背景设定】；③开头控制在【字数，如100】字以内，需要在结尾制造悬念、冲突或情感共鸣，让读者想继续读下去；④文笔风格【细腻/简洁有力/幽默】；⑤不需要写完整故事，只需开头段落。" },
+        { title: "创意命名", template: "我需要为【产品/项目/活动/团队】取一个名字。核心关键词是【关键词】，风格偏【简洁/有趣/专业/国际化】，使用场景是【场景】。请给出【数量，如8】个创意名称，要求：①每个名字尽量简短易记、易传播；②说明每个名字的含义或灵感来源（一句话即可）；③标注是否有谐音梗、双关或文化引用；④从中推荐1个最优方案并说明理由；⑤如适用，提示是否需要检查该名字是否已被广泛使用。" },
+        { title: "节日祝福文案", template: "请帮我写一段【节日】祝福文案。要求：①发送对象是【关系，如好友/老师/家人】；②风格【温暖/幽默/正式】；③字数【字数，如100】字以内；④要结合节日特点融入具体的细节或意象，避免'祝你节日快乐'这类过于笼统的套话；⑤如适用，可加入与对方关系相关的个性化元素（如共同回忆、专属玩笑）。" },
+        { title: "社团/组织介绍", template: "请帮我写一段【社团/组织名称】的介绍文案。核心特色是【特色描述】，面向的受众是【招募对象】，使用场景是【场景，如招新海报/官网介绍】。要求：①字数【字数，如200】字以内；②语气活泼有感染力，能激发对方加入的兴趣；③结构包含'我们是谁—我们做什么/有什么亮点—你能获得什么—如何加入'；④结尾包含明确的行动号召（如报名方式、联系方式占位）。" },
+        { title: "金句提炼", template: "请从以下内容中提炼适合作为金句或座右铭的话。要求：①提炼【数量，如3-5】句，要求简洁有力、朗朗上口、便于记忆和传播；②可以适当改写原文使其更精炼，但不能改变原意；③每句标注一下适用场景（如适合作为文章金句/朋友圈文案/座右铭）；④从中标出你认为最出彩的一句并说明理由。内容：【粘贴内容】" },
+        { title: "文案脑洞延伸", template: "我有一个初步的创意想法：【粘贴初步想法】。请帮我做脑洞延伸，要求：①从'如果换一个场景/如果换一个受众/如果反过来想'等角度，提出【数量，如5】个延伸方向；②每个方向说明可能的呈现形式（如做成视频、海报、互动活动等）；③评估每个方向的'新颖度'和'实现难度'（高/中/低）；④推荐其中最值得尝试的一个，并说明第一步可以怎么做。" },
+        { title: "角色设定设计", template: "我需要为【用途，如小说/游戏/社团IP形象】设计一个角色。基本要求：性别/年龄【设定】，性格关键词【关键词】，背景设定【简要背景】。请帮我完善角色设定，要求：①给出角色的外貌特征描述（适合用于插画或文字描述）；②设计3-5个性格细节或口头禅，体现角色的独特性；③补充角色的背景故事或动机（一段话）；④给出1-2个可以体现该角色性格的小故事场景示例。" },
+        { title: "创意游戏设计", template: "我需要为【场合，如班级团建/社团活动/宿舍聚会】设计一个小游戏。参与人数约【人数】人，可用道具有限（或【列出可用道具】），时长约【时长】分钟。请设计游戏方案，要求：①说明游戏规则，要简单易懂、便于现场快速讲解；②说明所需道具（尽量简单易得）和场地要求；③设计获胜/惩罚机制，增加趣味性但不尴尬冒犯；④提示可能出现的混乱情况及应对方式。" },
+        { title: "短视频脚本创作", template: "请帮我写一个短视频脚本。主题是【主题】，平台是【平台，如抖音/B站/视频号】，时长约【秒数】秒，风格【搞笑/知识科普/治愈/剧情反转】。要求：①按'分镜'形式呈现，每个分镜包含画面内容描述+对应文案/台词+时长建议；②开头3秒需要有强吸引力的钩子；③结尾设计一个记忆点或互动引导（如关注/评论引导）；④标注是否需要配乐或特效建议。" },
+        { title: "海报文案创意", template: "我需要为【活动/产品】设计一张海报，请帮我写海报文案。核心信息是【核心信息，如活动主题、时间地点】，目标受众是【受众】，风格【简约/复古/科技感/可爱】。要求：①给出主标题（吸引眼球，不超过12字）和副标题（补充说明，不超过20字）；②列出海报正文需要包含的关键信息点（分点）；③给出1条排版建议（如视觉重心、留白）；④标注文案的整体语气基调。" },
+        { title: "歌词/诗歌创作", template: "请帮我创作一首【歌词/诗歌】。主题是【主题】，情感基调是【情感，如怀念/激励/温柔/感伤】，风格参考【风格参考，如校园民谣/现代诗，可选】。要求：①如果是歌词，请按'主歌-副歌-主歌-副歌-桥段'结构创作，并标注段落；如果是诗歌，分为【段落数】段；②语言意象具体、有画面感，避免空洞的形容词堆砌；③押韵自然不生硬（如适用）；④创作完成后用一句话说明整体的情感线索。" },
+        { title: "创意礼物建议", template: "我想为【对象，如朋友/家人/老师】挑选一份礼物，对方的特点/喜好是【特点描述】，预算约【预算】，场合是【场合，如生日/毕业/节日】。请给出礼物建议，要求：①推荐【数量，如5】个具体的礼物方向，覆盖不同类型（实用型、纪念型、体验型等）；②每个建议说明选择理由，结合对方的特点；③提示是否可以加入个性化定制元素（如刻字、手写卡片）；④给出预算范围内的搭配建议（如礼物+小卡片组合）。" }
+      ]
+    },
+    aigc: {
+      label: "🎨 AI绘图",
+      items: [
+        { title: "人像写实风格", template: "Ultra-realistic portrait photo of a young woman with【发型，如long wavy brown hair】, wearing【服装，如a light blue linen dress】, standing in【场景，如a sunlit garden in early morning】. Composition: 【构图，如medium shot, eye-level angle】. Lighting: soft natural window light, gentle rim light. Camera: shot on Canon EOS R5, 85mm lens, f/1.8, shallow depth of field, photorealistic skin texture, 8K resolution. Negative prompt: cartoon, illustration, blurry, deformed face, extra fingers." },
+        { title: "动漫插画风格", template: "Anime style illustration of【角色描述，如a student with glasses and a school uniform】,【场景，如sitting by a window in a cozy library on a rainy afternoon】. Mood:【氛围，如nostalgic and warm】. Style: Studio Ghibli inspired, hand-painted background, warm color palette with soft gradients, detailed linework, soft cel shading. Composition:【构图，如medium shot, slightly from above】. Quality tags: high quality, detailed, masterpiece, 4K. Aspect ratio: 【比例，如3:4】." },
+        { title: "风景场景描述", template: "A breathtaking landscape photo of【场景，如a misty mountain valley at sunrise with a winding river below】. Lighting: dramatic golden hour lighting, volumetric fog, soft sun rays breaking through clouds. Composition: wide-angle shot, leading lines drawn by the river, rule of thirds. Style: ultra-detailed, cinematic color grading, National Geographic style, 4K landscape photography. Aspect ratio: 16:9. Negative prompt: oversaturated, low quality, watermark, blurry horizon." },
+        { title: "赛博朋克风格", template: "A cyberpunk cityscape at night,【具体场景，如a narrow rainy street lined with neon signs and food stalls】. Atmosphere: heavy rain, reflections of purple and cyan neon lights on wet pavement, steam rising from vents. Architecture: futuristic high-rise buildings with holographic billboards. Style: cinematic, ultra-detailed, Blade Runner aesthetic, moody color grading dominated by purple, blue and magenta. Composition:【构图，如low angle shot looking up between buildings】. Quality: 8K, highly detailed." },
+        { title: "极简插画风格", template: "Minimalist flat illustration of【主题，如a coffee cup and an open notebook on a desk】. Style: clean geometric shapes, limited color palette of【颜色，如soft purple, cream white and a single accent of orange】, no gradients (or subtle flat gradients only), generous negative space. Composition: centered, simple background with minimal elements. Format: vector art style, suitable for app icon / poster background. Aspect ratio:【比例，如1:1】." },
+        { title: "油画古典风格", template: "Classical oil painting of【主题，如a young woman reading a book by a window】. Lighting: warm candlelight, Rembrandt-style chiaroscuro with strong contrast between light and shadow. Composition: classical portrait composition, three-quarter view. Texture: visible brushstrokes, rich impasto texture, canvas texture visible. Color palette: warm earthy tones with deep shadows. Style: museum quality, highly detailed, in the style of 17th century Dutch master painting." },
+        { title: "负向提示词模板", template: "通用负向提示词（用于排除不想要的内容，可根据具体画面追加）：Negative prompt: blurry, low quality, low resolution, jpeg artifacts, distorted, deformed, disfigured, ugly, bad anatomy, bad proportions, extra limbs, extra fingers, missing fingers, fused fingers, mutated hands, watermark, signature, text, logo, out of frame, cropped, duplicate, poorly drawn face, poorly drawn hands, oversaturated, overexposed, underexposed. 使用说明：将以上内容作为negative prompt与正向提示词配合使用，可根据画面类型（人像/风景/插画）删减不相关项。" },
+        { title: "Logo设计提示词", template: "Modern logo design for【品牌/项目名称】, representing【品牌定位/行业，如a student tech startup】. Style:【风格，如minimalist/tech-futuristic/hand-drawn/retro】. Color scheme:【颜色方案，如deep purple and white】. Requirements: white or transparent background, vector style (flat, no gradients unless specified), clean geometric shapes, scalable design suitable for both app icon and print. Composition: centered icon with optional wordmark below. Quality: professional, high resolution, suitable for branding guidelines." },
+        { title: "壁纸风格生成", template: "Desktop wallpaper design,【主题，如abstract purple and blue gradient with flowing geometric shapes】. Style: modern aesthetic, smooth gradients, subtle noise texture for depth. Composition: balanced, with a focal point slightly off-center, suitable for placing desktop icons without visual clutter. Resolution: ultra-detailed, high resolution (suitable for 4K). Aspect ratio: 16:9. Mood: suitable for【场景，如dark mode desktop / calm study environment】." },
+        { title: "食物摄影风格", template: "Professional food photography of【食物名称，如a bowl of ramen with soft-boiled egg and scallions】, placed on【背景/桌面，如a dark wooden table】. Lighting: soft natural side lighting creating gentle shadows, steam rising visible. Composition: top-down or 45-degree angle shot, shallow depth of field with background slightly blurred. Style: appetizing, vibrant but natural colors, magazine-quality food styling, shot on a macro lens, 8K detail. Negative prompt: messy, unappetizing, plastic-looking, blurry." },
+        { title: "建筑设计渲染", template: "Architectural visualization render of【建筑类型，如a modern minimalist house with large glass windows】, located in【环境，如a forest setting surrounded by tall trees】. Style: photorealistic 3D render, modern architecture, clean lines, natural materials (wood, concrete, glass). Lighting: soft daylight, golden hour, realistic shadows and reflections. Composition:【构图，如exterior view from a low angle showing the front facade】. Quality: ultra-detailed, 8K, rendered in the style of high-end architectural visualization (V-Ray / Corona render style)." },
+        { title: "像素艺术风格", template: "Pixel art illustration of【主题，如a small cozy bedroom with a bed, desk and bookshelf】. Style:【分辨率风格，如16-bit retro game style】, limited color palette, clean pixel edges, no anti-aliasing blur. Composition: side view or isometric view (specify which). Mood:【氛围，如cozy and nostalgic】. Suitable for: game asset / icon / wallpaper (specify use). Aspect ratio:【比例，如1:1 or 4:3】." },
+        { title: "水彩插画风格", template: "Watercolor illustration of【主题，如a small town street with cafes and bicycles】. Style: soft watercolor textures with visible paper grain, gentle color bleeding at edges, light and airy color palette dominated by【颜色，如pastel blues and warm yellows】. Composition:【构图，如eye-level street view with one-point perspective】. Mood:【氛围，如peaceful afternoon】. Quality: hand-painted feel, high resolution, suitable for postcard or book illustration." },
+        { title: "产品摄影风格", template: "Professional product photography of【产品，如a minimalist ceramic mug】, placed on【背景，如a plain pastel-colored background with soft shadow】. Lighting: studio softbox lighting, even illumination, subtle reflections on the surface. Composition: centered product shot,【角度，如slightly angled three-quarter view】, with negative space for adding text/logo later. Style: clean, commercial, e-commerce style product photo, ultra-sharp focus, 8K. Negative prompt: cluttered background, harsh shadows, dust, fingerprints." },
+        { title: "角色三视图设定", template: "Character design reference sheet (turnaround) for【角色描述，如a young adventurer with a backpack and a short sword】. Requirements: show front view, side view, and back view of the same character on a single image, consistent proportions and design across all three views. Style:【风格，如anime/semi-realistic/cartoon】. Background: plain white or light grey, no scene elements. Additional notes: include small annotations or color swatches for key design elements (clothing colors, accessories) if possible. Quality: clean lineart, high resolution, character sheet style." }
+      ]
+    },
+    jobs: {
+      label: "💼 求职",
+      items: [
+        { title: "简历优化", template: "请帮我优化以下简历内容。目标岗位是【目标岗位】，目标公司/行业是【公司/行业】。要求：①使用更有力的动词开头描述每段经历（如'主导'、'优化'、'搭建'而非'负责'）；②尽量将描述量化（补充具体数字，如效率提升百分比、用户量等，如原文没有数据请用【】标注让我补充）；③突出与目标岗位JD相关的技能和经历，弱化无关内容；④检查是否有冗余、重复或表述不清的地方并修改；⑤每段经历控制在2-3条要点以内。原简历内容：【粘贴简历内容】" },
+        { title: "自我介绍撰写", template: "请帮我写一段求职面试用的自我介绍。背景信息：专业【专业】，目标岗位【目标岗位】，核心经历/亮点【经历1、经历2】，性格特点【性格关键词，可选】。要求：①时长约【秒数，如60-90】秒（约150-200字）；②结构为'基本情况—核心经历与能力—与岗位的匹配点—结尾表态'；③语言自然、有逻辑，避免照搬简历原文；④突出1-2个最有说服力的亮点并简要展开。" },
+        { title: "面试问题准备", template: "我即将面试【目标岗位】，应聘公司是【公司名称，可选】，岗位JD要点是【粘贴JD要点或简述】。请帮我准备面试问题，要求：①给出【数量，如8-10】个该岗位常见的面试问题，覆盖'专业能力/项目经历/行为面试（STAR）/职业规划/反问环节'等类别；②对其中3-4个高频问题给出回答思路或要点提示（不需要写完整答案）；③提示我应该重点准备哪些与我的简历经历相关的追问方向；④给出2个适合在面试结尾向面试官提问的问题。" },
+        { title: "实习申请邮件", template: "请帮我写一封实习申请邮件。目标公司/部门是【公司/部门】，应聘岗位是【岗位名称】，我的核心背景是【专业、年级、相关经历】，附件包含【附件内容，如简历、作品集】。要求：①邮件主题需简洁明确，包含姓名、学校、应聘岗位等关键信息；②正文包含自我介绍、申请动机（为什么选择这家公司/岗位）、核心优势（2-3点，结合岗位需求）、附件说明四部分；③语气专业、谦逊但不卑微；④控制在200字以内，结尾礼貌并附联系方式占位。" },
+        { title: "Offer对比分析", template: "我目前收到了以下几个offer，请帮我分析对比。Offer信息：【逐一列出每个offer的公司、岗位、薪资、地点、发展前景等信息】。我个人的考量优先级是【优先级，如薪资/发展空间/工作地点/行业前景，可填写排序】。请帮我：①从薪资待遇、职业发展、工作内容、生活成本、行业前景等维度做对比分析（建议用表格）；②结合我的优先级，给出倾向性建议并说明理由；③指出每个offer可能存在的风险或需要进一步确认的信息；④提示我在做决定前可以再了解哪些信息。" },
+        { title: "职业规划建议", template: "我目前的情况是：专业【专业】，年级【年级】，已有经历【相关经历/实习/项目】，感兴趣的方向是【感兴趣的方向，可以是多个】，对【方向】不确定/犹豫的原因是【原因，可选】。请帮我做职业规划分析，要求：①分析我目前的优势和需要补足的短板（结合感兴趣的方向）；②对每个感兴趣的方向，简要说明该领域的入门路径、所需技能和大致的发展前景；③给出未来【时间段，如1年内】可以采取的具体行动建议（如考证、实习方向、技能学习）；④如果方向之间有冲突，给出选择时可以参考的判断标准。" },
+        { title: "求职信撰写", template: "请帮我写一封求职信（Cover Letter），应聘【公司名称】的【岗位名称】。我的背景：【专业、关键经历、核心技能】，岗位JD核心要求：【粘贴JD要点】。要求：①开头说明应聘岗位和获知渠道；②主体部分将我的经历和技能与JD要求逐一对应说明（2-3个对应点）；③体现对该公司/行业的了解和认同（如有相关信息请补充：【公司相关信息，可选】）；④结尾表达期待面试机会的意愿；⑤全文控制在【字数，如350】字以内，语气专业诚恳。" },
+        { title: "STAR法则经历改写", template: "请帮我用STAR法则（情境Situation-任务Task-行动Action-结果Result）改写以下经历描述，用于简历或面试回答。原始经历描述：【粘贴原始描述】。要求：①明确拆分出S、T、A、R四个部分，每部分1-2句话；②A（行动）部分要具体说明'我做了什么'，避免笼统的'参与了'；③R（结果）部分尽量量化，如果原文没有具体数据，请用【】标注提示我补充；④输出两个版本：一个是简历用的精简版（3-4句话），一个是面试口述用的完整版（可以稍长，更口语化）。" },
+        { title: "求职信公司调研", template: "我准备应聘【公司名称】的【岗位名称】，面试/写求职信前需要做公司调研。请帮我整理调研框架，要求：①列出需要了解的关键信息类别（如公司主营业务、近期动态、企业文化、竞争对手、该岗位所在部门的职责等）；②针对每个类别，给出2-3个可以在面试或求职信中体现'我做过功课'的切入点示例（用占位符表示具体信息，如【公司近期产品/项目】）；③提示在面试中如何自然地引用调研信息，避免显得刻意；④给出1-2个可以向面试官提出的、体现深度思考的问题方向。" },
+        { title: "模拟面试官追问", template: "请你扮演【目标岗位】的面试官，针对我的这段经历进行追问式模拟面试。我的经历描述：【粘贴经历描述】。要求：①先提出1个开放性问题，让我先回答（等待我的回复后再继续）；②根据我的回答，像真实面试官一样进行2-3轮追问，深挖细节、动机、遇到的困难和反思（追问要犀利但专业）；③在模拟结束后，给出整体反馈：我的回答中哪些地方有说服力，哪些地方逻辑或细节不足，并给出改进建议。" },
+        { title: "简历项目经历提炼", template: "以下是我的项目/实习经历的详细描述（可能比较冗长或口语化），请帮我提炼成简历可用的条目。原始描述：【粘贴详细描述】。要求：①提炼为【数量，如3】条要点，每条以动词开头，控制在【字数，如30】字以内；②突出我在其中的角色、采取的行动和产出的结果；③尽量体现可迁移的能力（如沟通协调、数据分析、项目管理等），并与目标岗位【目标岗位】的要求建立联系；④如果原文缺少量化数据，标注【】提示我补充。" },
+        { title: "离职/调岗理由表达", template: "我准备在面试或离职沟通中说明离开上一家单位/调整方向的原因。真实情况是：【真实原因，如发展空间有限/想换行业/与原专业不符等，可详细描述】。请帮我组织语言，要求：①将原因转化为正面、专业的表达方式，避免抱怨前公司、前同事或前领导；②强调'向前看'的动机（如寻求新的成长机会、与新岗位的契合），而不是'逃离'某种状况；③语言简洁、真诚，控制在3-4句话以内，适合口头表达；④如果涉及敏感信息（如人际矛盾），提示我哪些细节不需要在面试中提及。" },
+        { title: "谈薪策略建议", template: "我即将与【公司名称，可选】就【岗位名称】的薪资进行沟通。背景信息：该岗位市场薪资范围大致是【薪资范围，如有了解】，我目前的期望是【期望薪资】，我的核心筹码/优势是【筹码，如多个offer/稀缺技能/相关经验】。请帮我准备谈薪策略，要求：①给出1-2套谈薪话术示例，语气专业、不卑不亢；②提示在什么时机提出薪资期望比较合适（如对方先报价 vs 主动提出）；③说明如果对方给出的薪资低于预期，可以如何回应或争取（如询问其他福利、未来调薪机制）；④提醒谈薪过程中需要注意的礼仪和忌讳。" },
+        { title: "求职平台简介优化", template: "请帮我优化【平台，如LinkedIn/脉脉/BOSS直聘】上的个人简介（About/简介栏）。我的背景：【专业、目标方向、核心技能/经历】。要求：①控制在【字数，如150】字以内，第一人称或第三人称均可（请说明你选择的原因）；②开头一句话点明我的定位（如'XX专业在读，专注于XX方向'）；③突出2-3个核心技能或亮点经历，并尽量包含与目标岗位相关的关键词（便于HR搜索匹配）；④结尾可以加入一句体现个人特质或求职意向的话。" },
+        { title: "行业岗位选择建议", template: "我正在纠结是否要进入【行业A】还是【行业B】（或具体岗位A/B），我的专业背景是【专业】，已有经历是【相关经历】，个人偏好/顾虑是【偏好或顾虑，如薪资/工作强度/兴趣/家庭因素】。请帮我分析，要求：①分别简要介绍这两个行业/岗位的工作内容、入行门槛、薪资水平大致区间和发展路径；②结合我的背景，分析我在每个方向上的优劣势；③列出做选择前我还需要进一步了解或验证的信息（如可以找哪些人聊、看哪些资料）；④给出一个相对中立的决策框架，而不是直接替我做决定。" }
+      ]
+    },
+    coding: {
+      label: "💻 编程技术",
+      items: [
+        { title: "代码解释", template: "请帮我解释以下代码。要求：①先用一段话概括这段代码整体的功能和作用；②按代码块或逻辑段落，逐段说明其作用和关键逻辑；③对其中使用的关键函数、库或语法特性（如有不常见的）单独解释；④指出代码中如果存在潜在问题或可以改进的地方（即使不要求修改，也请提示）。代码（语言：【编程语言】）：\n【粘贴代码】" },
+        { title: "Debug调试", template: "我的代码运行报错或结果不符合预期，请帮我Debug。环境信息：编程语言/框架【语言/框架】，错误信息或异常现象是【粘贴报错信息或描述异常现象】，期望的结果是【期望结果】。要求：①分析可能导致该问题的原因（按可能性从高到低排列）；②针对最可能的原因，给出具体的修改方案和修改后的代码片段；③解释为什么这样修改可以解决问题；④如果有多种可能原因，提示我可以如何进一步定位（如添加哪些打印/日志）。相关代码：【粘贴代码】" },
+        { title: "代码注释生成", template: "请为以下代码添加注释。要求：①使用【语言，如中文】注释，符合该编程语言的注释规范（如Python用#或docstring，Java用//或/** */）；②对函数/方法添加文档注释，说明功能、参数含义、返回值；③对关键的逻辑步骤添加行内注释，说明'为什么这么做'而不是简单复述代码本身；④不要对每一行都加注释，避免冗余，只在必要处添加；⑤保持原代码逻辑不变。代码（语言：【编程语言】）：\n【粘贴代码】" },
+        { title: "代码优化建议", template: "请帮我优化以下代码。要求：①从'可读性'、'性能'、'代码规范'三个角度分别给出改进建议；②如果存在明显的性能问题（如不必要的循环嵌套、重复计算），给出优化后的代码并说明优化原理；③检查是否有不符合该语言惯用写法（idiomatic）的地方，给出更地道的写法；④保持代码功能完全不变，优化前后的输出结果应一致；⑤如果代码本身已经比较好，请说明理由，不要为了改而改。代码（语言：【编程语言】）：\n【粘贴代码】" },
+        { title: "技术方案对比", template: "我正在做【项目/功能描述】，需要在【方案A，如技术栈/框架/数据库A】和【方案B】之间做选择。我的项目背景是：团队规模【规模】，预期使用场景【使用场景，如并发量、数据规模等】，团队熟悉程度【熟悉程度】。请帮我对比分析，要求：①从'学习成本'、'性能/扩展性'、'生态与社区支持'、'与现有技术栈的兼容性'等维度对比（建议用表格）；②结合我的项目背景，给出倾向性建议并说明理由；③指出选择某一方案后可能遇到的坑或需要注意的点；④如果两者各有优势难以取舍，提示是否存在'两者结合'的折中方案。" },
+        { title: "正则表达式生成", template: "请帮我编写一个正则表达式，用于【匹配目标，如匹配手机号/提取邮箱/校验密码强度】。具体要求：①需要匹配/排除的格式细节是：【详细规则，如'手机号为11位数字，以1开头'】；②适用的编程语言/环境是【语言，如JavaScript/Python/Java】（不同语言的正则语法略有差异）；③请给出正则表达式本身，并逐部分解释每个组成部分的含义；④提供2-3个测试用例（应该匹配的和不应该匹配的各举例），验证该正则的正确性。" },
+        { title: "SQL查询编写", template: "请帮我编写SQL查询语句。数据库表结构如下：【描述表结构，如表名、字段名及含义，可附建表语句】。查询需求是：【具体需求，如'查询每个用户最近一次订单的金额和时间，按金额降序排列'】。要求：①给出完整的SQL语句（标注使用的数据库类型，如MySQL/PostgreSQL，因为语法可能略有差异）；②逐步解释SQL的执行逻辑（如使用了哪些JOIN、子查询、窗口函数及其作用）；③如果查询涉及大表，提示可能的性能问题和优化建议（如索引建议）；④如果需求描述存在歧义，请指出并给出你的理解假设。" },
+        { title: "代码重构建议", template: "以下代码功能正常，但我希望进行重构以提高可维护性。要求：①分析当前代码存在的设计问题（如函数过长、职责不清、重复代码、命名不规范等）；②给出重构方案，可以包括拆分函数/方法、提取公共逻辑、引入设计模式等（说明使用该模式的理由，避免过度设计）；③给出重构后的代码；④确保重构后功能与原代码完全一致，并说明如何验证（如可以补充哪些测试用例）。代码（语言：【编程语言】）：\n【粘贴代码】" },
+        { title: "单元测试编写", template: "请为以下函数/方法编写单元测试。测试框架使用【框架，如pytest/Jest/JUnit】。要求：①覆盖正常情况、边界情况（如空输入、极值）和异常情况（如非法输入应抛出异常）至少各1-2个用例；②每个测试用例命名清晰，能体现测试的场景；③对于依赖外部资源（如数据库、API）的部分，说明是否需要mock以及如何mock；④给出完整可运行的测试代码。被测代码（语言：【编程语言】）：\n【粘贴代码】" },
+        { title: "API文档撰写", template: "请帮我为以下接口撰写API文档。接口信息：【描述接口，如请求方法、路径、参数、返回值，或直接粘贴代码】。要求：①按照标准API文档格式呈现，包含'接口说明、请求方法与路径、请求参数（字段名/类型/是否必填/说明）、返回示例（JSON格式）、可能的错误码及含义'；②语言简洁准确，参数说明要清晰到前端/调用方无需看代码即可使用；③如果接口涉及鉴权，说明鉴权方式；④给出一个调用示例（如curl命令或代码片段）。接口相关信息：【粘贴信息或代码】" },
+        { title: "Git提交信息规范", template: "请根据以下代码改动内容，帮我生成符合规范的Git提交信息。改动内容描述：【描述本次改动做了什么，可以是粗略描述或diff片段】。要求：①遵循Conventional Commits规范，格式为'<type>(<scope>): <subject>'，type从feat/fix/docs/style/refactor/test/chore中选择最合适的；②subject使用中文（或英文，请说明语言偏好【中文/英文】），简洁概括改动内容，不超过50字；③如果改动较复杂，补充正文部分（body），分点说明具体改了什么、为什么改；④如果涉及破坏性变更，标注BREAKING CHANGE。" },
+        { title: "算法复杂度分析", template: "请分析以下算法/代码的时间复杂度和空间复杂度。要求：①给出最终的时间复杂度和空间复杂度（用大O表示法），并说明推导过程（如循环次数、递归深度如何影响复杂度）；②指出代码中复杂度的'瓶颈'部分是哪一段；③如果存在更优的算法思路（如可以用空间换时间、使用更优数据结构等），简要说明优化方向和优化后的复杂度，不强制要求给出完整代码；④用通俗的语言总结这个算法'适合处理多大规模的数据'。代码（语言：【编程语言】）：\n【粘贴代码】" },
+        { title: "技术学习路径规划", template: "我想学习【技术方向，如前端开发/Python数据分析/机器学习】，目前的基础是【当前基础，如零基础/会一些Python语法】，目标是【目标，如能独立完成一个小项目/通过某门课程/找相关实习】，可投入时间约【每周时间】。请帮我规划学习路径，要求：①将学习过程分为【阶段数，如3-4】个阶段，每个阶段说明学习目标和核心内容；②每个阶段推荐1-2种学习资源类型（如官方文档、教程网站、书籍，不需要具体链接，描述类型即可）；③每个阶段设计一个可以巩固所学的小练习或小项目方向；④提示该领域常见的学习误区或容易卡住的地方。" },
+        { title: "代码风格统一建议", template: "以下是项目中的多段代码（可能来自不同人编写），请帮我检查代码风格的一致性问题。要求：①检查命名规范（变量、函数、类命名是否统一，如驼峰/下划线混用）、缩进、空格、注释风格等方面是否存在不一致；②指出具体哪些地方不符合【语言，如Python】的通用代码风格规范（如PEP8、Airbnb JS规范等，请说明参考的规范）；③给出统一后的代码示例；④建议是否可以引入自动化工具（如linter/formatter）来避免此类问题，简要说明思路即可。代码：\n【粘贴代码】" },
+        { title: "错误日志分析", template: "以下是程序运行时产生的错误日志/堆栈信息，请帮我分析。日志内容：【粘贴日志/堆栈信息】，相关代码上下文（如有）：【粘贴相关代码】。要求：①解读日志中的关键信息，定位最可能的报错位置和错误类型；②分析可能的根本原因（区分'直接原因'和'根本原因'）；③给出排查建议或修复方向；④如果日志信息不足以定位问题，说明还需要补充哪些信息（如完整堆栈、相关配置、复现步骤）。" }
+      ]
+    },
+    life: {
+      label: "🌈 日常生活",
+      items: [
+        { title: "行程规划", template: "我计划去【目的地】旅行/出行，时间为【天数】天，出行人数【人数】，预算约【预算】，偏好【偏好，如美食/历史人文/自然风光/性价比】。请帮我规划行程，要求：①按天列出每日行程安排，包含主要景点/活动、大致时间安排和交通方式建议；②每天合理控制行程密度，预留休息和弹性时间；③推荐1-2个当地特色美食或体验项目；④提示需要提前预订的事项（如门票、交通）和注意事项（如天气、证件）。" },
+        { title: "饮食建议", template: "请帮我制定饮食建议方案。我的情况：【描述，如身高体重、目标（增肌/减脂/维持）、饮食限制（如不吃辣/素食/过敏食物）、日常作息】，可接受的预算和做饭时间是【预算/时间】。要求：①给出一日三餐（及加餐，如适用）的搭配建议，注重营养均衡（蛋白质/碳水/蔬菜比例）；②尽量给出具体可操作的食物示例，而非笼统的'多吃蔬菜'；③如果有目标（如减脂），说明大致的热量控制思路（不需要精确到卡路里，给出合理范围）；④提示1-2个容易被忽视但重要的饮食习惯建议。" },
+        { title: "纠纷处理文案", template: "我遇到了一个纠纷，需要写一段沟通文案来解决。情况描述：【详细描述纠纷情况，如与谁的纠纷、起因、目前进展】，我希望达到的结果是【期望结果，如退款/道歉/重新处理】。请帮我撰写沟通文案，要求：①语气保持冷静、礼貌但坚定，不带攻击性词汇；②清晰陈述事实经过（按时间顺序），并明确指出对方的问题所在；③明确提出我的诉求和合理的解决期限；④如适用，提示可以保留哪些证据或采取哪些后续步骤（如平台投诉、消费者协会等），但不需要写成威胁性语言。" },
+        { title: "快递投诉", template: "我需要针对一次快递问题进行投诉/沟通。情况：快递单号【单号，可选】，问题描述是【问题描述，如'包裹破损/长时间未送达/虚假签收'】，已尝试的沟通【已采取的措施，如有】，希望的处理结果是【期望结果，如重新派送/赔偿/退款】。请帮我写一段投诉/沟通文字，要求：①清晰说明问题和已采取的措施，体现'已经尝试自行解决但未果'；②语气理性、有理有据，避免情绪化表达；③明确提出诉求和合理的回复时限；④根据情况提示可以投诉的渠道（如平台客服、官方投诉电话、邮政管理部门等，描述类型即可）。" },
+        { title: "租房合同要点检查", template: "以下是我的租房合同内容（或主要条款），请帮我检查需要注意的要点。合同内容：【粘贴合同条款或描述主要内容】，我的情况：【补充信息，如合租/独立租房、押金金额、租期等】。要求：①逐条检查租金、押金、违约金、维修责任、提前退租条款等关键条款是否清晰合理，标注存在风险或表述模糊的地方；②对照常见的'霸王条款'类型（如不退押金的不合理理由、单方面涨价等），提示是否存在类似问题；③给出在签约前可以与房东/中介进一步确认或协商的具体问题清单；④提示需要保留哪些证据（如签约前的房屋状况照片、原有设施清单等）。" },
+        { title: "时间管理建议", template: "我目前在时间管理上遇到的问题是：【描述问题，如'拖延严重/任务太多不知道如何排序/容易被打断'】，我的日常安排大致是【描述日常安排，如课程、社团、兼职等时间占用情况】。请帮我提供时间管理建议，要求：①针对我描述的具体问题，分析可能的原因；②推荐1-2种适合我情况的时间管理方法（如番茄工作法、四象限法则等），并说明如何结合我的实际情况使用；③给出一个示例性的一日/一周时间安排框架（不需要精确到分钟，给出时间段划分即可）；④提示1-2个容易被忽视但能显著改善时间管理的小习惯。" },
+        { title: "二手交易文案", template: "我想在【平台，如闲鱼/校园二手群】出售一件【物品名称】，物品基本信息：【物品成色、购买时间、原价、现价、转手原因等】。请帮我写一条出售文案，要求：①标题简洁，包含物品名称和核心卖点（如'95新'、'降价急出'）；②正文清晰说明物品的成色、使用情况、转手原因、是否可议价、交易方式（如自提/包邮，用【】标注让我补充）；③语气真诚，适当强调物品的优点，但不夸大或隐瞒瑕疵（如有瑕疵请预留位置让我补充说明）；④结尾注明联系方式占位和交易注意事项。" },
+        { title: "健身计划制定", template: "请帮我制定健身计划。我的情况：【基本信息，如性别、身高体重、健身经验（新手/有一定基础）、目标（增肌/减脂/塑形/提升体能）】，可用时间是每周【次数】次，每次约【时长】分钟，可用器材/场地是【器材/场地，如健身房/家中无器械】。要求：①按周给出训练安排，明确每次训练的部位/类型（如力量训练分化、有氧等）；②每次训练给出具体动作示例（动作名称+大致组数次数），适合我的经验水平；③提示训练前后的热身和拉伸建议；④给出1-2条关于恢复和避免受伤的注意事项。" },
+        { title: "沟通话术建议", template: "我需要在【场景，如向室友提出意见/向老师请假/拒绝朋友的请求】中进行沟通，但担心表达不当造成尴尬或冲突。具体情况是：【详细描述情况和我想表达的内容】。请帮我设计沟通话术，要求：①给出1-2个版本的表达方式，语气要兼顾'清晰表达诉求'和'维护关系'；②提示沟通时机和场合的选择建议（如面对面/文字消息，私下/公开）；③如果对方可能有不同反应，给出应对不同反应的回应思路；④提示沟通中需要避免的表达方式或措辞。" },
+        { title: "预算规划建议", template: "我每月可支配收入/生活费约【金额】，主要支出方向包括【列出主要支出类别，如房租/餐饮/交通/娱乐/学习】，目前的问题是【问题，如'月底总是不够花/想攒钱但存不下来'】。请帮我做预算规划，要求：①按支出类别给出合理的预算分配建议（可以给出大致比例和金额范围）；②结合我描述的问题，分析可能的支出'漏洞'在哪里；③推荐1-2种适合学生的记账或预算管理方法；④给出一个'攒钱目标'的可行性建议（如每月可以攒下多少、需要哪些调整）。" },
+        { title: "物品收纳整理建议", template: "我的【空间，如宿舍/书桌/衣柜】比较【现状描述，如杂乱、空间小】，主要存放的物品有【物品类型，如衣物、书籍、电子产品、化妆品等】，空间大小大致是【空间描述】。请帮我提供收纳整理建议，要求：①按物品类型分别给出收纳方法和建议（如分类原则、是否需要收纳工具）；②针对空间小的问题，给出'空间利用最大化'的具体思路（如垂直收纳、隐藏收纳等）；③给出一个简单可执行的整理步骤顺序（先做什么后做什么）；④提示1-2个可以长期维持整洁的小习惯。" },
+        { title: "生活习惯养成计划", template: "我想养成【目标习惯，如早睡早起/每天阅读/规律运动】的习惯，目前的情况是【现状，如经常熬夜/三分钟热度】，希望在【时间段，如21天/1个月】内初步建立这个习惯。请帮我制定养成计划，要求：①将目标拆解为循序渐进的小目标（避免一开始要求过高导致放弃）；②结合习惯养成的常见原理（如触发-行为-奖励），给出具体的执行建议；③设计一个简单的打卡或追踪方式；④预测我可能在哪个阶段容易放弃，并给出应对建议。" },
+        { title: "旅行打包清单", template: "我即将去【目的地】旅行，时间为【天数】天，季节/天气是【季节/天气情况】，行程类型偏向【类型，如city walk/户外徒步/海滨度假/商务出差】，出行方式是【交通方式，如飞机/高铁/自驾】。请帮我列一份打包清单，要求：①按类别分类（如证件类、衣物类、电子设备、洗漏用品、常用药品等）；②结合目的地天气和行程类型，给出针对性的物品建议（如徒步需要的鞋袜、海滨需要的防晒用品）；③标注哪些是'容易遗忘但很重要'的物品；④如果是飞机出行，提示需要注意的行李限制相关事项（不需要查具体航司规定，提醒我自行确认即可）。" },
+        { title: "矛盾沟通话术（室友/同学）", template: "我和【室友/同学】之间因为【具体矛盾描述，如作息时间不一致/卫生习惯不同/借东西未归还】产生了一些矛盾，目前的关系状态是【关系现状，如还能正常交流但有些尴尬】。我希望【期望结果，如双方各退一步/对方能改善某个习惯/把话说开】。请帮我设计沟通方案，要求：①建议合适的沟通时机和方式（如私下面谈/共同协商规则）；②给出开场白话术，避免一上来就指责，先建立沟通氛围；③给出表达诉求的具体话术，做到'对事不对人'；④如果对方反应不佳，提示可以如何调整或寻求其他帮助（如宿管、辅导员，仅在必要时）。" },
+        { title: "周末/假期安排建议", template: "我有【时间长度，如一个周末/三天小长假】的空闲时间，目前的状态是【状态，如比较累需要休息/想充实利用/有一些拖延的任务要处理】，可选的活动方向有【兴趣方向，如运动、追剧、社交、学习、出游等，可列多个】。请帮我安排这段时间，要求：①给出一个兼顾'休息'和'充实'的整体安排思路；②按时间段给出具体安排建议（不需要精确到分钟）；③如果有需要处理的任务（如作业、家务），合理穿插安排，避免堆到最后；④提示1条让这段时间过得更有'满足感'的小建议。" }
+      ]
+    }
+  };
+
+  // ===================== 主题切换逻辑 =====================
+  const themeToggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+
+  // 初始化主题：优先读取 localStorage，没有则跟随系统偏好
+  function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      setTheme(saved);
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(prefersDark ? 'dark' : 'light');
+    }
+  }
+
+  // 设置主题并更新按钮图标
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '☀️';
+    } else {
+      root.removeAttribute('data-theme');
+      themeToggle.textContent = '🌙';
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    setTheme(isDark ? 'light' : 'dark');
+  });
+
+  initTheme();
+
+  // ===================== Tab 与卡片渲染逻辑 =====================
+  const tabsEl = document.getElementById('tabs');
+  const cardGridEl = document.getElementById('cardGrid');
+  const searchInput = document.getElementById('searchInput');
+
+  let currentCategory = Object.keys(data)[0]; // 默认选中第一个分类
+
+  // 渲染分类 Tab
+  function renderTabs() {
+    tabsEl.innerHTML = '';
+    Object.keys(data).forEach(key => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (key === currentCategory ? ' active' : '');
+      btn.textContent = data[key].label;
+      btn.addEventListener('click', () => {
+        currentCategory = key;
+        renderTabs();
+        renderCards();
+      });
+      tabsEl.appendChild(btn);
+    });
+  }
+
+  // 将模板文本中的【占位符】替换为高亮 span
+  function highlightPlaceholders(text) {
+    return text.replace(/【[^】]*】/g, match => `<span class="placeholder">${match}</span>`);
+  }
+
+  // 创建单个卡片元素
+  function createCard(item) {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = item.title;
+
+    const template = document.createElement('div');
+    template.className = 'card-template card-text';
+    template.innerHTML = highlightPlaceholders(item.template);
+
+    // 展开/收起按钮
+    const expandBtn = document.createElement('button');
+    expandBtn.className = 'expand-btn';
+    expandBtn.textContent = '展开 ▾';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.textContent = '📋 一键复制';
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(item.template).then(() => {
+        copyBtn.textContent = '✓ 已复制';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = '📋 一键复制';
+          copyBtn.classList.remove('copied');
+        }, 1500);
+      });
+    });
+
+    // 按钮行：展开按钮 + 复制按钮
+    const actions = document.createElement('div');
+    actions.className = 'card-actions';
+    actions.appendChild(expandBtn);
+    actions.appendChild(copyBtn);
+
+    card.appendChild(title);
+    card.appendChild(template);
+    card.appendChild(actions);
+    return card;
+  }
+
+  // 渲染卡片区域（无搜索时，按当前分类显示）
+  function renderCards() {
+    cardGridEl.innerHTML = '';
+    cardGridEl.classList.remove('fadeIn');
+    // 触发重新动画
+    void cardGridEl.offsetWidth;
+
+    const items = data[currentCategory].items;
+    items.forEach(item => {
+      cardGridEl.appendChild(createCard(item));
+    });
+  }
+
+  // 渲染搜索结果（跨所有分类匹配）
+  function renderSearchResults(keyword) {
+    cardGridEl.innerHTML = '';
+    const lowerKeyword = keyword.toLowerCase();
+    let matched = [];
+
+    Object.values(data).forEach(category => {
+      category.items.forEach(item => {
+        if (item.title.toLowerCase().includes(lowerKeyword) ||
+            item.template.toLowerCase().includes(lowerKeyword)) {
+          matched.push(item);
+        }
+      });
+    });
+
+    if (matched.length === 0) {
+      const noResult = document.createElement('div');
+      noResult.className = 'no-result';
+      noResult.textContent = '没有找到相关提示词';
+      cardGridEl.appendChild(noResult);
+      return;
+    }
+
+    matched.forEach(item => {
+      cardGridEl.appendChild(createCard(item));
+    });
+  }
+
+  // 监听搜索输入
+  searchInput.addEventListener('input', () => {
+    const keyword = searchInput.value.trim();
+    if (keyword) {
+      tabsEl.style.display = 'none';
+      renderSearchResults(keyword);
+    } else {
+      tabsEl.style.display = 'flex';
+      renderCards();
+    }
+  });
+
+  // 展开/收起逻辑：使用事件委托，兼容动态生成的卡片
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('expand-btn')) {
+      const card = e.target.closest('.card');
+      const text = card.querySelector('.card-text');
+      const isExpanded = text.classList.toggle('expanded');
+      e.target.textContent = isExpanded ? '收起 ▴' : '展开 ▾';
+      e.stopPropagation();
+    }
+  });
+
+  // 初始化页面
+  renderTabs();
+  renderCards();
+</script>
+</body>
+</html>

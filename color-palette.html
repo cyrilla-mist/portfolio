@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>配色生成器</title>
+<style>
+  /* ===== 主题变量（亮色） ===== */
+  :root {
+    --bg: #f7f5fb;
+    --bg-secondary: #ffffff;
+    --text: #2b2438;
+    --text-muted: #6e6480;
+    --primary: #7c5cff;
+    --primary-light: #a78bfa;
+    --primary-dark: #5b3df5;
+    --card-bg: #ffffff;
+    --card-border: rgba(124, 92, 255, 0.12);
+    --shadow: rgba(124, 92, 255, 0.15);
+    --tag-bg: rgba(124, 92, 255, 0.1);
+    --transition: 0.3s ease;
+  }
+  /* ===== 主题变量（暗色） ===== */
+  [data-theme="dark"] {
+    --bg: #14101f;
+    --bg-secondary: #1d1830;
+    --text: #ece8f7;
+    --text-muted: #a89cc4;
+    --primary: #a78bfa;
+    --primary-light: #c4b5fd;
+    --primary-dark: #7c5cff;
+    --card-bg: #1d1830;
+    --card-border: rgba(167, 139, 250, 0.18);
+    --shadow: rgba(124, 92, 255, 0.25);
+    --tag-bg: rgba(167, 139, 250, 0.15);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background var(--transition), color var(--transition);
+    min-height: 100vh;
+  }
+
+  /* ===== 导航栏 ===== */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .nav-logo {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--primary);
+  }
+
+  .theme-toggle {
+    background: var(--tag-bg);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+
+  .theme-toggle:hover {
+    background: var(--card-border);
+  }
+
+  /* ===== 容器 ===== */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ===== 标题区 ===== */
+  .page-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .page-header h1 {
+    font-size: 2.2rem;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  /* ===== 输入区 ===== */
+  .input-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .color-picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* 原生色盘，放大并加紫色边框 */
+  #colorPicker {
+    width: 60px;
+    height: 60px;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    cursor: pointer;
+    background: none;
+    padding: 2px;
+  }
+
+  .hex-input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hex-input-wrap label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  #hexInput {
+    width: 140px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text);
+    transition: border-color var(--transition);
+  }
+
+  #hexInput:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  /* 输入无效时边框变红 */
+  #hexInput.invalid {
+    border-color: #ff5c5c;
+  }
+
+  .random-btn {
+    margin-left: auto;
+    padding: 12px 20px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .random-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+
+  /* ===== Tab 切换 ===== */
+  .tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ===== 色块展示区 ===== */
+  .palette-display {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .color-card {
+    flex: 1;
+    min-width: 140px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px var(--shadow);
+    text-align: center;
+  }
+
+  .color-block {
+    height: 120px;
+    width: 100%;
+  }
+
+  .color-info {
+    padding: 12px;
+  }
+
+  .color-hex {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .copy-btn {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+
+  .copy-btn:hover {
+    background: var(--card-border);
+  }
+
+  .copy-btn.copied {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ===== 色阶区 ===== */
+  .shades-section {
+    margin-bottom: 40px;
+  }
+
+  .shades-section h2 {
+    margin-bottom: 16px;
+    font-size: 1.4rem;
+  }
+
+  .shade-display {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .shade-card {
+    flex: 1;
+    min-width: 90px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px var(--shadow);
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .shade-block {
+    height: 70px;
+    width: 100%;
+  }
+
+  .shade-info {
+    padding: 8px;
+  }
+
+  .shade-label {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  .shade-hex {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* ===== 历史记录区 ===== */
+  .history-section {
+    margin-bottom: 40px;
+  }
+
+  .history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .history-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .clear-history-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+
+  .clear-history-btn:hover {
+    background: var(--card-border);
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 4px 16px var(--shadow);
+    flex-wrap: wrap;
+  }
+
+  .history-swatches {
+    display: flex;
+    gap: 6px;
+  }
+
+  .history-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+  }
+
+  .history-hex {
+    font-weight: bold;
+    color: var(--text);
+  }
+
+  .apply-btn {
+    margin-left: auto;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+
+  .apply-btn:hover {
+    background: var(--primary-dark);
+  }
+
+  .history-empty {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* ===== 预览区 ===== */
+  .preview-section h2 {
+    margin-bottom: 16px;
+    font-size: 1.4rem;
+  }
+
+  .preview-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 16px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .preview-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .preview-card {
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid;
+    padding: 16px;
+    background: var(--bg-secondary);
+    color: var(--text);
+  }
+
+  .preview-card h3 {
+    margin-bottom: 8px;
+  }
+
+  .preview-text h4 {
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .preview-text p {
+    margin: 0;
+  }
+
+  .preview-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: bold;
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 768px) {
+    .input-section {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .random-btn {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    .palette-display {
+      flex-direction: column;
+    }
+
+    .color-card {
+      min-width: 100%;
+    }
+
+    .shade-display {
+      flex-wrap: wrap;
+    }
+
+    .shade-card {
+      min-width: calc(33.333% - 8px);
+    }
+
+    .history-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .apply-btn {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="nav-logo">🎨 配色生成器</div>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+  </nav>
+
+  <div class="container">
+    <!-- 标题区 -->
+    <header class="page-header">
+      <h1>配色生成器</h1>
+      <p>选择主色，自动生成专业配色方案</p>
+    </header>
+
+    <!-- 输入区 -->
+    <section class="input-section">
+      <div class="color-picker-wrap">
+        <input type="color" id="colorPicker" value="#7c5cff">
+        <div class="hex-input-wrap">
+          <label for="hexInput">十六进制色值</label>
+          <input type="text" id="hexInput" value="#7c5cff" maxlength="7" spellcheck="false">
+        </div>
+      </div>
+      <button class="random-btn" id="randomBtn">🎲 随机颜色</button>
+    </section>
+
+    <!-- Tab 切换 -->
+    <div class="tabs">
+      <button class="tab-btn active" data-mode="complementary">互补色</button>
+      <button class="tab-btn" data-mode="analogous">类似色</button>
+      <button class="tab-btn" data-mode="triadic">三角配色</button>
+    </div>
+
+    <!-- 色块展示区 -->
+    <div class="palette-display" id="paletteDisplay"></div>
+
+    <!-- 色阶展示区 -->
+    <section class="shades-section">
+      <h2>色阶</h2>
+      <div class="shade-display" id="shadeDisplay"></div>
+    </section>
+
+    <!-- 预览区 -->
+    <section class="preview-section">
+      <h2>预览效果</h2>
+      <div class="preview-box">
+        <button class="preview-button" id="previewButton">主要按钮</button>
+        <div class="preview-card" id="previewCard">
+          <h3>卡片标题</h3>
+          <p>这是一段卡片内容示例文字，用于展示当前配色方案在卡片中的效果。</p>
+        </div>
+        <div class="preview-text" id="previewText">
+          <h4>文字标题</h4>
+          <p>这是一段正文文字，颜色会跟随当前选中的配色方案变化。</p>
+        </div>
+        <span class="preview-badge" id="previewBadge">标签 Badge</span>
+      </div>
+    </section>
+
+    <!-- 历史记录区 -->
+    <section class="history-section">
+      <div class="history-header">
+        <h2>历史记录</h2>
+        <button class="clear-history-btn" id="clearHistoryBtn">清空历史</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </div>
+
+  <footer>© 2026 Cyrilla · 配色生成器</footer>
+
+  <script>
+    // ===================== 颜色转换工具函数 =====================
+
+    // 将 HEX 转为 HSL，返回 {h, s, l}（h: 0-360，s/l: 0-100）
+    function hexToHsl(hex) {
+      hex = hex.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0; // 灰色
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+
+      return { h: h * 360, s: s * 100, l: l * 100 };
+    }
+
+    // 将 HSL 转为 HEX 字符串
+    function hslToHex(h, s, l) {
+      h = ((h % 360) + 360) % 360; // 归一化到 0-360
+      s /= 100;
+      l /= 100;
+
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+      let r, g, b;
+
+      if (h < 60) [r, g, b] = [c, x, 0];
+      else if (h < 120) [r, g, b] = [x, c, 0];
+      else if (h < 180) [r, g, b] = [0, c, x];
+      else if (h < 240) [r, g, b] = [0, x, c];
+      else if (h < 300) [r, g, b] = [x, 0, c];
+      else [r, g, b] = [c, 0, x];
+
+      const toHex = v => {
+        const hex = Math.round((v + m) * 255).toString(16).padStart(2, '0');
+        return hex;
+      };
+
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+    }
+
+    // 互补色：主色 + 色相偏移180°
+    function getComplementary(hex) {
+      const { h, s, l } = hexToHsl(hex);
+      return [hex.toUpperCase(), hslToHex(h + 180, s, l)];
+    }
+
+    // 类似色：主色色相 -30°、主色、主色色相 +30°
+    function getAnalogous(hex) {
+      const { h, s, l } = hexToHsl(hex);
+      return [hslToHex(h - 30, s, l), hex.toUpperCase(), hslToHex(h + 30, s, l)];
+    }
+
+    // 三角配色：主色、主色色相 +120°、主色色相 +240°
+    function getTriadic(hex) {
+      const { h, s, l } = hexToHsl(hex);
+      return [hex.toUpperCase(), hslToHex(h + 120, s, l), hslToHex(h + 240, s, l)];
+    }
+
+    // 主色色阶：S 保持不变，仅调整 L
+    function getShades(hex) {
+      const { h, s } = hexToHsl(hex);
+      const levels = {
+        100: 95,
+        200: 88,
+        300: 78,
+        400: 65,
+        500: null, // 主色本身
+        600: 45,
+        700: 35,
+        800: 25,
+        900: 15
+      };
+      return Object.entries(levels).map(([label, l]) => ({
+        label,
+        hex: l === null ? hex.toUpperCase() : hslToHex(h, s, l)
+      }));
+    }
+
+    // ===================== 状态与元素 =====================
+
+    const colorPicker = document.getElementById('colorPicker');
+    const hexInput = document.getElementById('hexInput');
+    const randomBtn = document.getElementById('randomBtn');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const paletteDisplay = document.getElementById('paletteDisplay');
+    const shadeDisplay = document.getElementById('shadeDisplay');
+    const historyList = document.getElementById('historyList');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const themeToggle = document.getElementById('themeToggle');
+
+    const HISTORY_KEY = 'colorPaletteHistory';
+
+    let currentMode = 'complementary'; // 当前激活的配色模式
+    let currentColor = '#7c5cff';      // 当前主色
+
+    // 校验十六进制颜色格式
+    function isValidHex(value) {
+      return /^#([0-9A-Fa-f]{6})$/.test(value);
+    }
+
+    // ===================== 配色生成与渲染 =====================
+
+    function getPaletteByMode(mode, hex) {
+      switch (mode) {
+        case 'complementary': return getComplementary(hex);
+        case 'analogous': return getAnalogous(hex);
+        case 'triadic': return getTriadic(hex);
+        default: return [hex];
+      }
+    }
+
+    // 渲染色块展示区
+    function renderPalette() {
+      const colors = getPaletteByMode(currentMode, currentColor);
+      paletteDisplay.innerHTML = '';
+
+      colors.forEach(color => {
+        const card = document.createElement('div');
+        card.className = 'color-card';
+
+        const block = document.createElement('div');
+        block.className = 'color-block';
+        block.style.background = color;
+
+        const info = document.createElement('div');
+        info.className = 'color-info';
+
+        const hexLabel = document.createElement('div');
+        hexLabel.className = 'color-hex';
+        hexLabel.textContent = color;
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = '复制';
+        copyBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(color).then(() => {
+            copyBtn.textContent = '✓ 已复制';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+              copyBtn.textContent = '复制';
+              copyBtn.classList.remove('copied');
+            }, 1500);
+          });
+        });
+
+        info.appendChild(hexLabel);
+        info.appendChild(copyBtn);
+        card.appendChild(block);
+        card.appendChild(info);
+        paletteDisplay.appendChild(card);
+      });
+
+      // 重新触发淡入动画
+      paletteDisplay.style.animation = 'none';
+      void paletteDisplay.offsetWidth; // 强制重排
+      paletteDisplay.style.animation = '';
+
+      renderPreview(colors[0]);
+      renderShades();
+    }
+
+    // 渲染主色色阶展示区
+    function renderShades() {
+      const shades = getShades(currentColor);
+      shadeDisplay.innerHTML = '';
+
+      shades.forEach(({ label, hex }) => {
+        const card = document.createElement('div');
+        card.className = 'shade-card';
+
+        const block = document.createElement('div');
+        block.className = 'shade-block';
+        block.style.background = hex;
+
+        const info = document.createElement('div');
+        info.className = 'shade-info';
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'shade-label';
+        labelEl.textContent = label;
+
+        const hexEl = document.createElement('div');
+        hexEl.className = 'shade-hex';
+        hexEl.textContent = hex;
+
+        info.appendChild(labelEl);
+        info.appendChild(hexEl);
+        card.appendChild(block);
+        card.appendChild(info);
+
+        // 点击整个色块复制色值
+        card.addEventListener('click', () => {
+          navigator.clipboard.writeText(hex).then(() => {
+            const original = hexEl.textContent;
+            hexEl.textContent = '✓ 已复制';
+            setTimeout(() => {
+              hexEl.textContent = original;
+            }, 1500);
+          });
+        });
+
+        shadeDisplay.appendChild(card);
+      });
+    }
+
+    // 渲染预览区，使用当前模式第一个颜色作为主色
+    function renderPreview(mainColor) {
+      const { h, s, l } = hexToHsl(mainColor);
+      const darkColor = hslToHex(h, s, Math.max(l - 15, 0));
+
+      const previewButton = document.getElementById('previewButton');
+      const previewCard = document.getElementById('previewCard');
+      const previewText = document.getElementById('previewText');
+      const previewBadge = document.getElementById('previewBadge');
+
+      previewButton.style.background = mainColor;
+      previewButton.style.color = '#fff';
+
+      previewCard.style.borderColor = mainColor;
+
+      previewText.querySelector('h4').style.color = darkColor;
+      previewText.querySelector('p').style.color = mainColor;
+
+      previewBadge.style.background = mainColor + '26'; // 半透明（约15%透明度）
+      previewBadge.style.color = mainColor;
+    }
+
+    // ===================== 输入同步逻辑 =====================
+
+    // 更新当前颜色并刷新页面（来自色盘、输入框或随机按钮）
+    // addHistory: 是否将该颜色记入历史记录（应用历史记录时不重复记录）
+    function updateColor(hex, addHistory = true) {
+      currentColor = hex;
+      colorPicker.value = hex;
+      hexInput.value = hex;
+      hexInput.classList.remove('invalid');
+      renderPalette();
+      if (addHistory) {
+        addToHistory(hex);
+      }
+    }
+
+    // 色盘改变 → 同步输入框
+    colorPicker.addEventListener('input', e => {
+      updateColor(e.target.value.toUpperCase());
+    });
+
+    // 输入框改变 → 校验并同步色盘
+    hexInput.addEventListener('input', e => {
+      let value = e.target.value.trim();
+      if (!value.startsWith('#')) value = '#' + value;
+
+      if (isValidHex(value)) {
+        hexInput.classList.remove('invalid');
+        currentColor = value.toUpperCase();
+        colorPicker.value = currentColor;
+        renderPalette();
+        addToHistory(currentColor);
+      } else {
+        hexInput.classList.add('invalid');
+      }
+    });
+
+    // 随机颜色按钮
+    randomBtn.addEventListener('click', () => {
+      const randomHex = '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase();
+      updateColor(randomHex);
+    });
+
+    // ===================== 历史记录逻辑 =====================
+
+    // 从 localStorage 读取历史记录
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // 保存历史记录到 localStorage
+    function saveHistory(history) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    // 新增一条历史记录（主色 + 4个搭配色，共5个色块），最多保留10条
+    function addToHistory(hex) {
+      const comp = getComplementary(hex);
+      const ana = getAnalogous(hex);
+      const tri = getTriadic(hex);
+      // 主色 + 互补色 + 类似色两个延伸色 + 三角配色一个延伸色
+      const swatches = [hex.toUpperCase(), comp[1], ana[0], ana[2], tri[1]];
+
+      let history = getHistory();
+      history.unshift({ main: hex.toUpperCase(), swatches });
+      if (history.length > 10) {
+        history = history.slice(0, 10);
+      }
+      saveHistory(history);
+      renderHistory();
+    }
+
+    // 渲染历史记录列表
+    function renderHistory() {
+      const history = getHistory();
+      historyList.innerHTML = '';
+
+      if (history.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'history-empty';
+        empty.textContent = '暂无历史记录';
+        historyList.appendChild(empty);
+        return;
+      }
+
+      history.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'history-item';
+
+        const swatchesWrap = document.createElement('div');
+        swatchesWrap.className = 'history-swatches';
+        item.swatches.forEach(color => {
+          const swatch = document.createElement('div');
+          swatch.className = 'history-swatch';
+          swatch.style.background = color;
+          swatchesWrap.appendChild(swatch);
+        });
+
+        const hexLabel = document.createElement('div');
+        hexLabel.className = 'history-hex';
+        hexLabel.textContent = item.main;
+
+        const applyBtn = document.createElement('button');
+        applyBtn.className = 'apply-btn';
+        applyBtn.textContent = '应用';
+        applyBtn.addEventListener('click', () => {
+          updateColor(item.main, false);
+        });
+
+        row.appendChild(swatchesWrap);
+        row.appendChild(hexLabel);
+        row.appendChild(applyBtn);
+        historyList.appendChild(row);
+      });
+    }
+
+    // 清空历史记录
+    clearHistoryBtn.addEventListener('click', () => {
+      saveHistory([]);
+      renderHistory();
+    });
+
+    // ===================== Tab 切换逻辑 =====================
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+        renderPalette();
+      });
+    });
+
+    // ===================== 深色模式逻辑 =====================
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.textContent = '🌙';
+      }
+    }
+
+    // 优先读取 localStorage，没有则跟随系统偏好
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        applyTheme(saved);
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('theme', next);
+    });
+
+    // ===================== 初始化 =====================
+
+    initTheme();
+    renderPalette();
+    renderHistory();
+  </script>
+</body>
+</html>
