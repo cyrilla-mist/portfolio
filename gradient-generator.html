@@ -1,0 +1,1421 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>渐变生成器</title>
+<style>
+  /* ===== 主题变量（亮色） ===== */
+  :root {
+    --bg: #f7f5fb;
+    --bg-secondary: #ffffff;
+    --text: #2b2438;
+    --text-muted: #6e6480;
+    --primary: #7c5cff;
+    --primary-light: #a78bfa;
+    --primary-dark: #5b3df5;
+    --card-bg: #ffffff;
+    --card-border: rgba(124, 92, 255, 0.12);
+    --shadow: rgba(124, 92, 255, 0.15);
+    --tag-bg: rgba(124, 92, 255, 0.1);
+    --transition: 0.3s ease;
+  }
+  /* ===== 主题变量（暗色） ===== */
+  [data-theme="dark"] {
+    --bg: #14101f;
+    --bg-secondary: #1d1830;
+    --text: #ece8f7;
+    --text-muted: #a89cc4;
+    --primary: #a78bfa;
+    --primary-light: #c4b5fd;
+    --primary-dark: #7c5cff;
+    --card-bg: #1d1830;
+    --card-border: rgba(167, 139, 250, 0.18);
+    --shadow: rgba(124, 92, 255, 0.25);
+    --tag-bg: rgba(167, 139, 250, 0.15);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background var(--transition), color var(--transition);
+    min-height: 100vh;
+  }
+
+  /* ===== 导航栏 ===== */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .nav-logo {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--primary);
+  }
+
+  .theme-toggle {
+    background: var(--tag-bg);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+
+  .theme-toggle:hover {
+    background: var(--card-border);
+  }
+
+  /* ===== 容器 ===== */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ===== 标题区 ===== */
+  .page-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .page-header h1 {
+    font-size: 2.2rem;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  /* ===== 通用卡片 ===== */
+  .card-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  .card-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+
+  /* ===== 颜色节点区 ===== */
+  .color-nodes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .color-node {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .node-picker {
+    width: 50px;
+    height: 50px;
+    border: 2px solid var(--primary);
+    border-radius: 10px;
+    cursor: pointer;
+    background: none;
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .node-hex {
+    width: 130px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text);
+    transition: border-color var(--transition);
+  }
+
+  .node-hex:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .node-hex.invalid {
+    border-color: #ff5c5c;
+  }
+
+  .node-remove {
+    margin-left: auto;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    flex-shrink: 0;
+  }
+
+  .node-remove:hover {
+    background: #ff5c5c;
+    color: #fff;
+  }
+
+  .add-node-btn {
+    padding: 10px 20px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  .add-node-btn:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .add-node-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* ===== Tab 切换 ===== */
+  .tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ===== 角度滑块 ===== */
+  .angle-control {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .angle-control input[type="range"] {
+    flex: 1;
+    accent-color: var(--primary);
+  }
+
+  .angle-value {
+    min-width: 60px;
+    text-align: right;
+    font-weight: bold;
+    color: var(--primary);
+  }
+
+  /* ===== 操作按钮区 ===== */
+  .action-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .action-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 12px 20px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .action-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+
+  .action-btn.secondary {
+    background: var(--tag-bg);
+    color: var(--primary);
+  }
+
+  .action-btn.secondary:hover {
+    background: var(--card-border);
+    color: var(--primary);
+    transform: none;
+  }
+
+  .import-tip {
+    margin-top: -12px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* ===== 预览区 ===== */
+  .preview-wrap {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .preview-box {
+    height: 300px;
+    border-radius: 16px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 16px var(--shadow);
+    transition: background 0.2s ease;
+  }
+
+  .fullscreen-btn {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background var(--transition);
+  }
+
+  .fullscreen-btn:hover {
+    background: rgba(0, 0, 0, 0.65);
+  }
+
+  /* ===== 代码展示区 ===== */
+  .code-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 0.95rem;
+    overflow-x: auto;
+  }
+
+  .code-box code {
+    flex: 1;
+    color: var(--primary-dark);
+    white-space: pre;
+  }
+
+  [data-theme="dark"] .code-box code {
+    color: var(--primary-light);
+  }
+
+  .copy-code-btn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+
+  .copy-code-btn:hover {
+    background: var(--card-border);
+  }
+
+  .copy-code-btn.copied {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ===== 全屏预览浮层 ===== */
+  .fullscreen-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: none;
+  }
+
+  .fullscreen-overlay.active {
+    display: block;
+  }
+
+  .fullscreen-float {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .fullscreen-float span {
+    color: #fff;
+    font-size: 0.95rem;
+  }
+
+  .exit-fullscreen-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--primary-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ===== 图案背景：风格卡片网格 ===== */
+  .pattern-style-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .pattern-style-card {
+    border: 2px solid var(--card-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    background: var(--bg-secondary);
+    transition: border-color var(--transition), background var(--transition);
+  }
+
+  .pattern-style-card:hover {
+    border-color: var(--primary-light);
+  }
+
+  .pattern-style-card.active {
+    border-color: var(--primary);
+    background: var(--tag-bg);
+  }
+
+  .pattern-style-card .style-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .pattern-style-card .style-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* ===== 图案背景：颜色控制 ===== */
+  .pattern-colors {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .pattern-color-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ===== 图案背景：参数控制 ===== */
+  .pattern-params {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .param-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .param-row > label {
+    min-width: 80px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .param-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--primary);
+  }
+
+  .param-value {
+    min-width: 50px;
+    text-align: right;
+    font-weight: bold;
+    color: var(--primary);
+  }
+
+  .seed-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  .seed-btn:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 768px) {
+    .color-node {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .node-hex {
+      width: 100%;
+    }
+
+    .node-remove {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    .preview-box {
+      height: 200px;
+    }
+
+    .action-row {
+      flex-direction: column;
+    }
+
+    .pattern-style-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pattern-colors {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .param-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .param-row > label {
+      min-width: 0;
+    }
+
+    .param-value {
+      text-align: left;
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="nav-logo">🌈 渐变生成器</div>
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+  </nav>
+
+  <div class="container">
+    <!-- 标题区 -->
+    <header class="page-header">
+      <h1>CSS 渐变背景生成器</h1>
+      <p>自由搭配颜色，生成专业渐变背景</p>
+    </header>
+
+    <!-- 颜色节点控制区 -->
+    <section class="card-section" id="colorNodesSection">
+      <h2>颜色节点</h2>
+      <div class="color-nodes" id="colorNodes"></div>
+      <button class="add-node-btn" id="addNodeBtn">+ 添加颜色</button>
+    </section>
+
+    <!-- 渐变类型 Tab -->
+    <section class="card-section">
+      <h2>渐变类型</h2>
+      <div class="tabs">
+        <button class="tab-btn active" data-type="linear">线性渐变</button>
+        <button class="tab-btn" data-type="radial">径向渐变</button>
+        <button class="tab-btn" data-type="conic">锥形渐变</button>
+        <button class="tab-btn" data-type="pattern">✨ 图案背景</button>
+      </div>
+      <!-- 角度滑块（仅线性渐变显示） -->
+      <div class="angle-control" id="angleControl">
+        <input type="range" id="angleSlider" min="0" max="360" value="135">
+        <span class="angle-value" id="angleValue">135°</span>
+      </div>
+    </section>
+
+    <!-- 图案背景控制区 -->
+    <section class="card-section" id="patternSection" style="display: none;">
+      <h2>图案风格</h2>
+      <div class="pattern-style-grid" id="patternStyleGrid"></div>
+
+      <h2>图案颜色</h2>
+      <div class="pattern-colors">
+        <div class="pattern-color-item">
+          <input type="color" class="node-picker" id="patternPrimaryPicker" value="#7c5cff">
+          <input type="text" class="node-hex" id="patternPrimaryHex" maxlength="7" spellcheck="false" value="#7C5CFF">
+        </div>
+        <div class="pattern-color-item">
+          <input type="color" class="node-picker" id="patternSecondaryPicker" value="#a78bfa">
+          <input type="text" class="node-hex" id="patternSecondaryHex" maxlength="7" spellcheck="false" value="#A78BFA">
+        </div>
+      </div>
+
+      <h2>图案参数</h2>
+      <div class="pattern-params">
+        <div class="param-row">
+          <label>透明度</label>
+          <input type="range" id="opacitySlider" min="0" max="100" value="100">
+          <span class="param-value" id="opacityValue">100%</span>
+        </div>
+        <div class="param-row">
+          <label></label>
+          <button class="seed-btn" id="seedBtn">🎲 换一个</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 操作按钮区 -->
+    <div class="action-row" id="gradientActionRow">
+      <button class="action-btn" id="randomBtn">🎲 随机渐变</button>
+      <button class="action-btn secondary" id="importBtn">📥 从配色生成器导入</button>
+    </div>
+    <p class="import-tip" id="importTip" style="display: none;"></p>
+
+    <!-- 预览区 -->
+    <div class="preview-wrap">
+      <div class="preview-box" id="previewBox"></div>
+      <button class="fullscreen-btn" id="fullscreenBtn">全屏预览</button>
+    </div>
+
+    <!-- CSS 代码展示区 -->
+    <section class="card-section" id="codeSection">
+      <h2>CSS 代码</h2>
+      <div class="code-box">
+        <code id="codeOutput">background: linear-gradient(135deg, #7c5cff, #a78bfa);</code>
+        <button class="copy-code-btn" id="copyCodeBtn">复制</button>
+      </div>
+    </section>
+  </div>
+
+  <footer>© 2026 Cyrilla · 渐变生成器</footer>
+
+  <!-- 全屏预览浮层 -->
+  <div class="fullscreen-overlay" id="fullscreenOverlay">
+    <div class="fullscreen-float">
+      <span>全屏预览</span>
+      <button class="exit-fullscreen-btn" id="exitFullscreenBtn">退出全屏</button>
+    </div>
+  </div>
+
+  <script>
+    // ===================== 状态 =====================
+
+    // 颜色节点列表，默认两个颜色
+    let colors = ['#7c5cff', '#a78bfa'];
+    // 当前渐变类型：linear / radial / conic
+    let gradientType = 'linear';
+    // 线性渐变角度
+    let angle = 135;
+
+    const MAX_COLORS = 4;
+    const MIN_COLORS = 2;
+
+    // ===================== 图案背景状态 =====================
+
+    // 当前选中的图案风格 key（10种之一）
+    let patternStyle = 'glow';
+    // 图案主色与次色
+    let patternPrimary = '#7c5cff';
+    let patternSecondary = '#a78bfa';
+    // 透明度：0-1
+    let patternOpacity = 1;
+    // 随机种子，用于"换一个"重新布局
+    let patternSeed = 1;
+
+    // 风格列表（10种，全部基于 CSS / 内联 SVG 实现）
+    const PATTERN_STYLES = [
+      { key: 'glow', name: '光晕叠加', desc: '多个径向渐变叠加，柔和光源效果' },
+      { key: 'noise', name: '噪点渐变', desc: '渐变底色叠加 SVG 噪点纹理' },
+      { key: 'circles', name: '日式和风圆', desc: '大小不一的空心圆环，禅意留白' },
+      { key: 'lines', name: '斜线纹理', desc: '均匀排列的细斜线，纸张质感' },
+      { key: 'dots', name: '点阵网格', desc: '规整排列的小圆点网格' },
+      { key: 'cross', name: '交叉线', desc: '密集排列的十字交叉线，工业感' },
+      { key: 'waves', name: '波浪填充', desc: '多层填充波浪曲线叠加' },
+      { key: 'hexoutline', name: '六边形描边', desc: '重复排列的六边形描边图案，科技感' },
+      { key: 'beams', name: '光束扫射', desc: '多条斜向光带交叠，动感十足' },
+      { key: 'ink', name: '水墨晕染', desc: '低饱和椭圆晕染叠加，宣纸国风' }
+    ];
+
+    // ===================== 元素引用 =====================
+
+    const colorNodesEl = document.getElementById('colorNodes');
+    const addNodeBtn = document.getElementById('addNodeBtn');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const angleControl = document.getElementById('angleControl');
+    const angleSlider = document.getElementById('angleSlider');
+    const angleValue = document.getElementById('angleValue');
+    const randomBtn = document.getElementById('randomBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importTip = document.getElementById('importTip');
+    const previewBox = document.getElementById('previewBox');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+    const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+    const codeOutput = document.getElementById('codeOutput');
+    const copyCodeBtn = document.getElementById('copyCodeBtn');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // 图案背景相关元素
+    const colorNodesSection = document.getElementById('colorNodesSection');
+    const patternSection = document.getElementById('patternSection');
+    const gradientActionRow = document.getElementById('gradientActionRow');
+    const patternStyleGrid = document.getElementById('patternStyleGrid');
+    const patternPrimaryPicker = document.getElementById('patternPrimaryPicker');
+    const patternPrimaryHex = document.getElementById('patternPrimaryHex');
+    const patternSecondaryPicker = document.getElementById('patternSecondaryPicker');
+    const patternSecondaryHex = document.getElementById('patternSecondaryHex');
+    const opacitySlider = document.getElementById('opacitySlider');
+    const opacityValue = document.getElementById('opacityValue');
+    const seedBtn = document.getElementById('seedBtn');
+
+    // 校验十六进制颜色格式
+    function isValidHex(value) {
+      return /^#([0-9A-Fa-f]{6})$/.test(value);
+    }
+
+    // ===================== 颜色节点渲染 =====================
+
+    function renderColorNodes() {
+      colorNodesEl.innerHTML = '';
+
+      colors.forEach((color, index) => {
+        const row = document.createElement('div');
+        row.className = 'color-node';
+
+        // 色盘
+        const picker = document.createElement('input');
+        picker.type = 'color';
+        picker.className = 'node-picker';
+        picker.value = color;
+        picker.addEventListener('input', e => {
+          colors[index] = e.target.value.toUpperCase();
+          hexInput.value = colors[index];
+          hexInput.classList.remove('invalid');
+          updatePreview();
+        });
+
+        // 十六进制输入框
+        const hexInput = document.createElement('input');
+        hexInput.type = 'text';
+        hexInput.className = 'node-hex';
+        hexInput.maxLength = 7;
+        hexInput.spellcheck = false;
+        hexInput.value = color;
+        hexInput.addEventListener('input', e => {
+          let value = e.target.value.trim();
+          if (!value.startsWith('#')) value = '#' + value;
+          if (isValidHex(value)) {
+            hexInput.classList.remove('invalid');
+            colors[index] = value.toUpperCase();
+            picker.value = colors[index];
+            updatePreview();
+          } else {
+            hexInput.classList.add('invalid');
+          }
+        });
+
+        row.appendChild(picker);
+        row.appendChild(hexInput);
+
+        // 删除按钮（节点数 >= 3 时才显示）
+        if (colors.length > MIN_COLORS) {
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'node-remove';
+          removeBtn.textContent = '✕';
+          removeBtn.addEventListener('click', () => {
+            colors.splice(index, 1);
+            renderColorNodes();
+            updatePreview();
+          });
+          row.appendChild(removeBtn);
+        }
+
+        colorNodesEl.appendChild(row);
+      });
+
+      // 节点数达到上限时隐藏添加按钮
+      addNodeBtn.style.display = colors.length >= MAX_COLORS ? 'none' : 'inline-block';
+    }
+
+    // 添加颜色节点
+    addNodeBtn.addEventListener('click', () => {
+      if (colors.length >= MAX_COLORS) return;
+      // 新节点取随机颜色
+      const randomHex = '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase();
+      colors.push(randomHex);
+      renderColorNodes();
+      updatePreview();
+    });
+
+    // ===================== 渐变类型 Tab =====================
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        gradientType = btn.dataset.type;
+
+        if (gradientType === 'pattern') {
+          // 切换到图案背景：隐藏渐变相关控制区，显示图案控制区
+          colorNodesSection.style.display = 'none';
+          angleControl.style.display = 'none';
+          gradientActionRow.style.display = 'none';
+          importTip.style.display = 'none';
+          patternSection.style.display = 'block';
+
+          renderPattern();
+        } else {
+          // 切换回渐变模式：恢复渐变相关控制区，隐藏图案控制区
+          colorNodesSection.style.display = 'block';
+          gradientActionRow.style.display = 'flex';
+          patternSection.style.display = 'none';
+
+          // 清除图案预览可能设置的内联样式
+          previewBox.removeAttribute('style');
+          // 仅线性渐变显示角度滑块
+          angleControl.style.display = gradientType === 'linear' ? 'flex' : 'none';
+          updatePreview();
+        }
+      });
+    });
+
+    // 角度滑块
+    angleSlider.addEventListener('input', e => {
+      angle = e.target.value;
+      angleValue.textContent = angle + '°';
+      updatePreview();
+    });
+
+    // ===================== 渐变字符串生成 =====================
+
+    function getGradientCss() {
+      const colorList = colors.join(', ');
+      switch (gradientType) {
+        case 'radial':
+          return `radial-gradient(${colorList})`;
+        case 'conic':
+          return `conic-gradient(${colorList})`;
+        case 'linear':
+        default:
+          return `linear-gradient(${angle}deg, ${colorList})`;
+      }
+    }
+
+    // 更新预览区与代码展示区
+    function updatePreview() {
+      const gradient = getGradientCss();
+      previewBox.style.background = gradient;
+      codeOutput.textContent = `background: ${gradient};`;
+
+      // 若全屏预览正在显示，同步更新背景
+      if (fullscreenOverlay.classList.contains('active')) {
+        fullscreenOverlay.style.background = gradient;
+      }
+    }
+
+    // ===================== 随机渐变 =====================
+
+    randomBtn.addEventListener('click', () => {
+      // 随机生成 2-3 个颜色节点
+      const count = Math.random() < 0.5 ? 2 : 3;
+      colors = [];
+      for (let i = 0; i < count; i++) {
+        colors.push('#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase());
+      }
+      // 随机角度
+      angle = Math.floor(Math.random() * 361);
+      angleSlider.value = angle;
+      angleValue.textContent = angle + '°';
+
+      renderColorNodes();
+      updatePreview();
+    });
+
+    // ===================== 从配色生成器导入 =====================
+
+    importBtn.addEventListener('click', () => {
+      const data = localStorage.getItem('palette-export');
+      if (!data) {
+        importTip.textContent = '请先在配色生成器中导出配色';
+        importTip.style.display = 'block';
+        setTimeout(() => {
+          importTip.style.display = 'none';
+        }, 2000);
+        return;
+      }
+
+      try {
+        const imported = JSON.parse(data);
+        if (Array.isArray(imported) && imported.length > 0) {
+          // 最多取前4个颜色节点
+          colors = imported.slice(0, MAX_COLORS).map(c => c.toUpperCase());
+          // 不足2个时补足默认颜色
+          while (colors.length < MIN_COLORS) {
+            colors.push('#7c5cff');
+          }
+          renderColorNodes();
+          updatePreview();
+          importTip.textContent = '✓ 导入成功';
+          importTip.style.display = 'block';
+          setTimeout(() => {
+            importTip.style.display = 'none';
+          }, 1500);
+        }
+      } catch (e) {
+        importTip.textContent = '请先在配色生成器中导出配色';
+        importTip.style.display = 'block';
+        setTimeout(() => {
+          importTip.style.display = 'none';
+        }, 2000);
+      }
+    });
+
+    // ===================== 全屏预览 =====================
+
+    fullscreenBtn.addEventListener('click', () => {
+      fullscreenOverlay.removeAttribute('style');
+      fullscreenOverlay.classList.add('active');
+      if (gradientType === 'pattern') {
+        renderPattern();
+      } else {
+        fullscreenOverlay.style.background = getGradientCss();
+      }
+    });
+
+    exitFullscreenBtn.addEventListener('click', () => {
+      fullscreenOverlay.classList.remove('active');
+    });
+
+    // ===================== 复制代码 =====================
+
+    copyCodeBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(codeOutput.textContent).then(() => {
+        copyCodeBtn.textContent = '✓ 已复制';
+        copyCodeBtn.classList.add('copied');
+        setTimeout(() => {
+          copyCodeBtn.textContent = '复制';
+          copyCodeBtn.classList.remove('copied');
+        }, 1500);
+      });
+    });
+
+    // ===================== 图案背景：颜色与工具函数 =====================
+
+    // 可重复的伪随机数生成器（基于种子），返回 [0,1) 之间的数
+    function mulberry32(seed) {
+      return function () {
+        seed |= 0;
+        seed = (seed + 0x6D2B79F5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    // 给 HEX 颜色附加透明度，返回 #RRGGBBAA 形式
+    function hexAlpha(hex, alphaFraction) {
+      const a = Math.max(0, Math.min(1, alphaFraction));
+      const alphaHex = Math.round(a * 255).toString(16).padStart(2, '0');
+      return hex + alphaHex;
+    }
+
+    // 将内联 SVG 字符串转换为可用于 background-image 的 data URI
+    function svgToDataUri(svg) {
+      return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    }
+
+    // ===================== 图案背景：风格卡片 =====================
+
+    // 渲染10个风格选择卡片（2列网格）
+    function renderPatternStyleGrid() {
+      patternStyleGrid.innerHTML = '';
+      PATTERN_STYLES.forEach(style => {
+        const card = document.createElement('div');
+        card.className = 'pattern-style-card' + (style.key === patternStyle ? ' active' : '');
+
+        const name = document.createElement('div');
+        name.className = 'style-name';
+        name.textContent = style.name;
+
+        const desc = document.createElement('div');
+        desc.className = 'style-desc';
+        desc.textContent = style.desc;
+
+        card.appendChild(name);
+        card.appendChild(desc);
+
+        card.addEventListener('click', () => {
+          patternStyle = style.key;
+          document.querySelectorAll('.pattern-style-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          renderPattern();
+        });
+
+        patternStyleGrid.appendChild(card);
+      });
+    }
+
+    // ===================== 图案背景：颜色 / 参数控件 =====================
+
+    // 主色色盘 → 同步十六进制输入框
+    patternPrimaryPicker.addEventListener('input', e => {
+      patternPrimary = e.target.value.toUpperCase();
+      patternPrimaryHex.value = patternPrimary;
+      patternPrimaryHex.classList.remove('invalid');
+      renderPattern();
+    });
+
+    // 主色十六进制输入框 → 校验并同步色盘
+    patternPrimaryHex.addEventListener('input', e => {
+      let value = e.target.value.trim();
+      if (!value.startsWith('#')) value = '#' + value;
+      if (isValidHex(value)) {
+        patternPrimaryHex.classList.remove('invalid');
+        patternPrimary = value.toUpperCase();
+        patternPrimaryPicker.value = patternPrimary;
+        renderPattern();
+      } else {
+        patternPrimaryHex.classList.add('invalid');
+      }
+    });
+
+    // 次色色盘 → 同步十六进制输入框
+    patternSecondaryPicker.addEventListener('input', e => {
+      patternSecondary = e.target.value.toUpperCase();
+      patternSecondaryHex.value = patternSecondary;
+      patternSecondaryHex.classList.remove('invalid');
+      renderPattern();
+    });
+
+    // 次色十六进制输入框 → 校验并同步色盘
+    patternSecondaryHex.addEventListener('input', e => {
+      let value = e.target.value.trim();
+      if (!value.startsWith('#')) value = '#' + value;
+      if (isValidHex(value)) {
+        patternSecondaryHex.classList.remove('invalid');
+        patternSecondary = value.toUpperCase();
+        patternSecondaryPicker.value = patternSecondary;
+        renderPattern();
+      } else {
+        patternSecondaryHex.classList.add('invalid');
+      }
+    });
+
+    // 透明度滑块
+    opacitySlider.addEventListener('input', e => {
+      patternOpacity = e.target.value / 100;
+      opacityValue.textContent = e.target.value + '%';
+      renderPattern();
+    });
+
+    // 换一个：重新生成随机种子，保持当前颜色与参数
+    seedBtn.addEventListener('click', () => {
+      patternSeed = Math.floor(Math.random() * 1000000);
+      renderPattern();
+    });
+
+    // ===================== 图案背景：1. 光晕叠加 =====================
+
+    // 多个径向渐变叠加，模拟柔和光源
+    function genGlow(rng) {
+      const pos1 = [Math.round(10 + rng() * 20), Math.round(40 + rng() * 20)];
+      const pos2 = [Math.round(70 + rng() * 15), Math.round(10 + rng() * 20)];
+      const pos3 = [Math.round(50 + rng() * 20), Math.round(70 + rng() * 20)];
+
+      const c1 = hexAlpha(patternPrimary, 0.4 * patternOpacity);
+      const c2 = hexAlpha(patternSecondary, 0.5 * patternOpacity);
+      const c3 = hexAlpha(patternPrimary, 0.3 * patternOpacity);
+      const bg = '#15131f';
+
+      const background = `radial-gradient(ellipse at ${pos1[0]}% ${pos1[1]}%, ${c1} 0%, transparent 60%), `
+        + `radial-gradient(ellipse at ${pos2[0]}% ${pos2[1]}%, ${c2} 0%, transparent 55%), `
+        + `radial-gradient(ellipse at ${pos3[0]}% ${pos3[1]}%, ${c3} 0%, transparent 50%), ${bg}`;
+
+      return {
+        properties: { background },
+        code: `background: ${background};`
+      };
+    }
+
+    // ===================== 图案背景：2. 噪点渐变 =====================
+
+    // 渐变底色 + SVG feTurbulence 噪点叠加
+    function genNoiseGradient(rng) {
+      const angle = Math.round(rng() * 360);
+      const noiseOpacity = (0.08 + rng() * 0.07) * patternOpacity;
+
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">`
+        + `<filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>`
+        + `<rect width="100%" height="100%" filter="url(#noise)" opacity="${noiseOpacity.toFixed(2)}"/></svg>`;
+
+      const noiseUrl = svgToDataUri(svg);
+      const gradient = `linear-gradient(${angle}deg, ${patternPrimary}, ${patternSecondary})`;
+      const backgroundImage = `${noiseUrl}, ${gradient}`;
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundSize: '200px 200px, cover',
+          backgroundRepeat: 'repeat, no-repeat'
+        },
+        code: `background-image: ${backgroundImage};\nbackground-size: 200px 200px, cover;\nbackground-repeat: repeat, no-repeat;`
+      };
+    }
+
+    // ===================== 图案背景：3. 日式和风圆 =====================
+
+    // 大小不一的空心圆环平铺，营造禅意留白感
+    function genCircles(rng) {
+      const tile = 120;
+      const count = 4 + Math.floor(rng() * 2);
+      const circles = [];
+      for (let i = 0; i < count; i++) {
+        const cx = Math.round(rng() * tile);
+        const cy = Math.round(rng() * tile);
+        const r = Math.round(10 + rng() * 40);
+        const color = rng() < 0.5 ? patternPrimary : patternSecondary;
+        circles.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="1.5" opacity="${(0.5 * patternOpacity).toFixed(2)}"/>`);
+      }
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tile}" height="${tile}">${circles.join('')}</svg>`;
+      const backgroundImage = svgToDataUri(svg);
+      const bg = '#fdfcfb';
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundColor: bg,
+          backgroundSize: `${tile}px ${tile}px`,
+          backgroundRepeat: 'repeat'
+        },
+        code: `background-image: ${backgroundImage};\nbackground-color: ${bg};\nbackground-size: ${tile}px ${tile}px;\nbackground-repeat: repeat;`
+      };
+    }
+
+    // ===================== 图案背景：4. 斜线纹理 =====================
+
+    // 均匀排列的细斜线，类似纸张纹理
+    function genDiagonalLines(rng) {
+      const spacing = 8 + Math.round(rng() * 8);
+      const lineColor = hexAlpha(patternPrimary, 0.25 * patternOpacity);
+      const bg = '#f7f5f2';
+      const backgroundImage = `repeating-linear-gradient(45deg, ${lineColor} 0px, ${lineColor} 1px, transparent 1px, transparent ${spacing}px)`;
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundColor: bg
+        },
+        code: `background-image: ${backgroundImage};\nbackground-color: ${bg};`
+      };
+    }
+
+    // ===================== 图案背景：5. 点阵网格 =====================
+
+    // SVG 重复绘制的小圆点网格
+    function genDots(rng) {
+      const tile = 10 + Math.round(rng() * 10);
+      const r = Math.max(1, Math.round(tile * 0.12));
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tile}" height="${tile}">`
+        + `<circle cx="${tile / 2}" cy="${tile / 2}" r="${r}" fill="${patternPrimary}" opacity="${patternOpacity.toFixed(2)}"/></svg>`;
+      const backgroundImage = svgToDataUri(svg);
+      const bg = hexAlpha(patternSecondary, 0.08);
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundColor: bg,
+          backgroundSize: `${tile}px ${tile}px`,
+          backgroundRepeat: 'repeat'
+        },
+        code: `background-image: ${backgroundImage};\nbackground-color: ${bg};\nbackground-size: ${tile}px ${tile}px;\nbackground-repeat: repeat;`
+      };
+    }
+
+    // ===================== 图案背景：6. 交叉线 =====================
+
+    // SVG 重复绘制的 X 形交叉线，密集排列，工业感
+    function genCross(rng) {
+      const tile = 24 + Math.round(rng() * 12);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tile}" height="${tile}">`
+        + `<path d="M0 0 L${tile} ${tile} M${tile} 0 L0 ${tile}" stroke="${patternPrimary}" stroke-width="1" opacity="${patternOpacity.toFixed(2)}"/></svg>`;
+      const backgroundImage = svgToDataUri(svg);
+      const bg = hexAlpha(patternSecondary, 0.06);
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundColor: bg,
+          backgroundSize: `${tile}px ${tile}px`,
+          backgroundRepeat: 'repeat'
+        },
+        code: `background-image: ${backgroundImage};\nbackground-color: ${bg};\nbackground-size: ${tile}px ${tile}px;\nbackground-repeat: repeat;`
+      };
+    }
+
+    // ===================== 图案背景：7. 波浪填充 =====================
+
+    // 多层 SVG 路径绘制的填充波浪，营造 blob 风格背景
+    function genWaveBlobs(rng) {
+      const w = 600, h = 300;
+      const colors = [patternPrimary, patternSecondary, patternPrimary];
+      const layers = [];
+      for (let i = 0; i < 3; i++) {
+        const baseY = h * (0.5 + i * 0.15);
+        const amp = 20 + rng() * 30;
+        const freq = 0.005 + rng() * 0.006;
+        const phase = rng() * Math.PI * 2;
+        let d = `M0 ${h}`;
+        for (let x = 0; x <= w; x += 20) {
+          const y = baseY + Math.sin(x * freq + phase) * amp;
+          d += ` L${x} ${y.toFixed(1)}`;
+        }
+        d += ` L${w} ${h} Z`;
+        const fillColor = hexAlpha(colors[i % colors.length], (0.5 - i * 0.1) * patternOpacity);
+        layers.push(`<path d="${d}" fill="${fillColor}"/>`);
+      }
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${layers.join('')}</svg>`;
+      const backgroundImage = svgToDataUri(svg);
+      const bg = '#f5f3fa';
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundColor: bg,
+          backgroundSize: '100% 100%',
+          backgroundRepeat: 'no-repeat'
+        },
+        code: `background-image: ${backgroundImage};\nbackground-color: ${bg};\nbackground-size: 100% 100%;\nbackground-repeat: no-repeat;`
+      };
+    }
+
+    // ===================== 图案背景：8. 六边形描边 =====================
+
+    // SVG 重复排列的六边形描边图案，科技感
+    function genHexOutline(rng) {
+      const r = 20 + Math.round(rng() * 15);
+      const w = Math.round(Math.sqrt(3) * r);
+      const h = Math.round(r * 3);
+
+      // 绘制以 (cx, cy) 为中心的六边形描边
+      function hex(cx, cy) {
+        const pts = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 180) * (60 * i - 30);
+          pts.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
+        }
+        return `<polygon points="${pts.join(' ')}" fill="none" stroke="${patternPrimary}" stroke-width="1" opacity="${patternOpacity.toFixed(2)}"/>`;
+      }
+
+      // 在矩形瓦片的四角与左右边缘各放一个六边形，实现近似无缝平铺
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">`
+        + hex(w / 2, 0) + hex(0, h / 2) + hex(w, h / 2) + hex(w / 2, h) + `</svg>`;
+      const backgroundImage = svgToDataUri(svg);
+      const bg = hexAlpha(patternSecondary, 0.05);
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundColor: bg,
+          backgroundSize: `${w}px ${h}px`,
+          backgroundRepeat: 'repeat'
+        },
+        code: `background-image: ${backgroundImage};\nbackground-color: ${bg};\nbackground-size: ${w}px ${h}px;\nbackground-repeat: repeat;`
+      };
+    }
+
+    // ===================== 图案背景：9. 光束扫射 =====================
+
+    // 多条斜向细长渐变光带交叠，营造动感
+    function genBeams(rng) {
+      const angle = 110 + Math.round(rng() * 30);
+      const count = 4 + Math.floor(rng() * 2);
+      const stops = [];
+      let pos = 0;
+      for (let i = 0; i < count; i++) {
+        pos += rng() * 20 + 5;
+        const width = 2 + rng() * 4;
+        const color = hexAlpha(i % 2 === 0 ? patternPrimary : patternSecondary, (0.2 + rng() * 0.3) * patternOpacity);
+        stops.push(`transparent ${pos.toFixed(1)}%`);
+        stops.push(`${color} ${(pos + width / 2).toFixed(1)}%`);
+        stops.push(`transparent ${(pos + width).toFixed(1)}%`);
+        pos += width;
+      }
+      const bg = '#13111c';
+      const backgroundImage = `linear-gradient(${angle}deg, ${stops.join(', ')})`;
+
+      return {
+        properties: {
+          backgroundImage,
+          backgroundColor: bg
+        },
+        code: `background-image: ${backgroundImage};\nbackground-color: ${bg};`
+      };
+    }
+
+    // ===================== 图案背景：10. 水墨晕染 =====================
+
+    // 多个低饱和度椭圆径向渐变叠加，宣纸底色，国风水墨感
+    function genInkWash(rng) {
+      const count = 3 + Math.floor(rng() * 2);
+      const colors = [patternPrimary, patternSecondary];
+      const blobs = [];
+      for (let i = 0; i < count; i++) {
+        const x = Math.round(rng() * 100);
+        const y = Math.round(rng() * 100);
+        const size = Math.round(40 + rng() * 40);
+        const color = hexAlpha(colors[i % colors.length], (0.2 + rng() * 0.2) * patternOpacity);
+        blobs.push(`radial-gradient(ellipse at ${x}% ${y}%, ${color} 0%, transparent ${size}%)`);
+      }
+      // 宣纸色背景
+      const bg = '#f5f0e8';
+      const background = `${blobs.join(', ')}, ${bg}`;
+
+      return {
+        properties: { background },
+        code: `background: ${background};`
+      };
+    }
+
+    // ===================== 图案背景：渲染调度 =====================
+
+    // 根据当前选中的风格生成 CSS 属性，应用到预览框（与全屏浮层）
+    function renderPattern() {
+      const rng = mulberry32(patternSeed);
+      let result;
+      switch (patternStyle) {
+        case 'glow': result = genGlow(rng); break;
+        case 'noise': result = genNoiseGradient(rng); break;
+        case 'circles': result = genCircles(rng); break;
+        case 'lines': result = genDiagonalLines(rng); break;
+        case 'dots': result = genDots(rng); break;
+        case 'cross': result = genCross(rng); break;
+        case 'waves': result = genWaveBlobs(rng); break;
+        case 'hexoutline': result = genHexOutline(rng); break;
+        case 'beams': result = genBeams(rng); break;
+        case 'ink': result = genInkWash(rng); break;
+      }
+
+      // 先清空旧的内联样式，避免不同风格的属性互相残留
+      previewBox.removeAttribute('style');
+      Object.assign(previewBox.style, result.properties);
+      codeOutput.textContent = result.code;
+
+      // 若全屏预览正在显示，同步更新
+      if (fullscreenOverlay.classList.contains('active')) {
+        fullscreenOverlay.removeAttribute('style');
+        fullscreenOverlay.classList.add('active');
+        Object.assign(fullscreenOverlay.style, result.properties);
+      }
+    }
+
+    // ===================== 深色模式逻辑 =====================
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.textContent = '🌙';
+      }
+    }
+
+    // 优先读取 localStorage，没有则跟随系统偏好
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        applyTheme(saved);
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('theme', next);
+    });
+
+    // ===================== 初始化 =====================
+
+    initTheme();
+    renderColorNodes();
+    updatePreview();
+    renderPatternStyleGrid();
+  </script>
+</body>
+</html>

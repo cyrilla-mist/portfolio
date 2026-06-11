@@ -350,6 +350,30 @@
     background: var(--card-border);
   }
 
+  /* ===== 导出按钮 ===== */
+  .export-btn {
+    padding: 10px 20px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    margin-top: 16px;
+  }
+  .export-btn:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .export-tip {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
   .history-list {
     display: flex;
     flex-direction: column;
@@ -547,6 +571,10 @@
     <!-- 色块展示区 -->
     <div class="palette-display" id="paletteDisplay"></div>
 
+    <!-- 导出到渐变生成器 -->
+    <button class="export-btn" id="exportBtn">📤 导出到渐变生成器</button>
+    <p class="export-tip" id="exportTip" style="display: none;">已导出，请前往渐变生成器使用</p>
+
     <!-- 色阶展示区 -->
     <section class="shades-section">
       <h2>色阶</h2>
@@ -687,6 +715,8 @@
     const historyList = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const themeToggle = document.getElementById('themeToggle');
+    const exportBtn = document.getElementById('exportBtn');
+    const exportTip = document.getElementById('exportTip');
 
     const HISTORY_KEY = 'colorPaletteHistory';
 
@@ -948,6 +978,21 @@
     clearHistoryBtn.addEventListener('click', () => {
       saveHistory([]);
       renderHistory();
+    });
+
+    // ===================== 导出到渐变生成器 =====================
+
+    // 将当前激活Tab的所有颜色存入 localStorage，供渐变生成器读取
+    exportBtn.addEventListener('click', () => {
+      const colors = getPaletteByMode(currentMode, currentColor);
+      localStorage.setItem('palette-export', JSON.stringify(colors));
+
+      exportBtn.textContent = '✓ 已导出';
+      exportTip.style.display = 'block';
+      setTimeout(() => {
+        exportBtn.textContent = '📤 导出到渐变生成器';
+        exportTip.style.display = 'none';
+      }, 1500);
     });
 
     // ===================== Tab 切换逻辑 =====================
