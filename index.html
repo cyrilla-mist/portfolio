@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyrilla · 个人作品集</title>
+<style>
+  :root {
+    --bg: #f7f5fb;
+    --bg-secondary: #ffffff;
+    --text: #2b2438;
+    --text-muted: #6e6480;
+    --primary: #7c5cff;
+    --primary-light: #a78bfa;
+    --primary-dark: #5b3df5;
+    --card-bg: #ffffff;
+    --card-border: rgba(124, 92, 255, 0.12);
+    --shadow: rgba(124, 92, 255, 0.15);
+    --tag-bg: rgba(124, 92, 255, 0.1);
+    --transition: 0.3s ease;
+  }
+
+  [data-theme="dark"] {
+    --bg: #14101f;
+    --bg-secondary: #1d1830;
+    --text: #ece8f7;
+    --text-muted: #a89cc4;
+    --primary: #a78bfa;
+    --primary-light: #c4b5fd;
+    --primary-dark: #7c5cff;
+    --card-bg: #1d1830;
+    --card-border: rgba(167, 139, 250, 0.18);
+    --shadow: rgba(124, 92, 255, 0.25);
+    --tag-bg: rgba(167, 139, 250, 0.15);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background var(--transition), color var(--transition);
+    line-height: 1.6;
+  }
+
+  /* Background decoration */
+  body::before {
+    content: "";
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+    opacity: 0.25;
+    border-radius: 50%;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: -250px;
+    left: -150px;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    opacity: 0.15;
+    border-radius: 50%;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    display: block;
+    margin-left: auto;
+    margin-top: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px var(--shadow);
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+    z-index: 100;
+  }
+
+  .theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 6px 20px var(--shadow);
+  }
+
+  /* Navbar */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+  }
+
+  .nav-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+  }
+
+  /* Container */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 40vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px 0 40px;
+  }
+
+  .hero .greeting {
+    font-size: 18px;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  .hero h1 {
+    font-size: clamp(48px, 10vw, 96px);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease 0.15s forwards;
+  }
+
+  .hero .subtitle {
+    font-size: clamp(16px, 3vw, 22px);
+    color: var(--text-muted);
+    font-weight: 500;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease 0.3s forwards;
+  }
+
+  .hero .subtitle span {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Section */
+  section {
+    padding: 60px 0;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 800;
+    margin-bottom: 32px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .section-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 48px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 2px;
+  }
+
+  /* About */
+  .about-content {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 36px;
+    margin-top: 32px;
+    font-size: 17px;
+    color: var(--text-muted);
+    box-shadow: 0 8px 30px var(--shadow);
+    transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+  }
+
+  .about-content:hover {
+    box-shadow: 0 16px 48px var(--shadow);
+  }
+
+  .about-content p {
+    margin-bottom: 12px;
+  }
+
+  .about-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about-content .highlight {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  /* Projects */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .project-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 28px;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 24px var(--shadow);
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .project-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary), var(--primary-light));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+  }
+
+  .project-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px var(--shadow);
+    border-color: var(--primary);
+  }
+
+  .project-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .project-card .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--tag-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 4px;
+    transition: transform var(--transition), background var(--transition);
+  }
+
+  .project-card:hover .icon {
+    transform: scale(1.1) rotate(-6deg);
+    background: var(--primary);
+  }
+
+  .project-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .project-card p {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    flex-grow: 1;
+  }
+
+  .contest-tag {
+    font-size: 12px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    border: 1px solid var(--card-border);
+    align-self: flex-start;
+  }
+
+  .project-card .link-arrow {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap var(--transition);
+  }
+
+  .project-card:hover .link-arrow {
+    gap: 12px;
+  }
+
+  /* Skills */
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 32px;
+  }
+
+  .skill-tag {
+    padding: 12px 24px;
+    background: var(--tag-bg);
+    color: var(--primary);
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 15px;
+    border: 1px solid var(--card-border);
+    transition: transform var(--transition), background var(--transition), color var(--transition), box-shadow var(--transition);
+    cursor: default;
+  }
+
+  .skill-tag:hover {
+    transform: translateY(-4px) scale(1.05);
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 8px 20px var(--shadow);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    border-top: 1px solid var(--card-border);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 600px) {
+    .hero {
+      min-height: 70vh;
+      padding: 60px 0 30px;
+    }
+    .theme-toggle {
+      width: 42px;
+      height: 42px;
+      font-size: 18px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <nav class="navbar">
+    <span class="nav-name">code &amp; curiosity</span>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">🌙</button>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <h1>Cyrilla's Portfolio</h1>
+  </header>
+
+  <!-- Projects -->
+  <section id="projects">
+    <h2 class="section-title">项目展示</h2>
+    <div class="project-grid">
+
+      <a class="project-card" href="./ai-tools.html">
+        <div class="icon">🧭</div>
+        <h3>AI工具导航页</h3>
+        <p>收录 50+ 大学生常用 AI 与效率工具，支持搜索 / 收藏 / 标签筛选，帮助同学们快速找到合适的工具。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="https://langqiao-d6g5zvk1wb73d079e-1435750613.tcloudbaseapp.com/bnpl.html" target="_blank" rel="noopener noreferrer">
+        <div class="icon">💳</div>
+        <h3>BNPL 先用后付网站</h3>
+        <span class="contest-tag">竞赛</span>
+        <p>面向先用后付金融产品的介绍网站，清晰展示产品特点与使用流程，竞赛项目作品。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="https://langqiao-d6g5zvk1wb73d079e-1435750613.tcloudbaseapp.com" target="_blank" rel="noopener noreferrer">
+        <div class="icon">🌉</div>
+        <h3>泰顺廊桥网站</h3>
+        <span class="contest-tag">竞赛</span>
+        <p>聚焦浙江泰顺廊桥文化的介绍网站，展现传统建筑之美与人文历史，竞赛项目作品。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="./prompt-tools.html">
+        <div class="icon">🧩</div>
+        <h3>AI提示词工具箱</h3>
+        <p>为大学生场景整理的提示词模板，覆盖写作、学习、PPT、求职等8个分类，点击复制直接使用。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="./color-palette.html">
+        <div class="icon">🎨</div>
+        <h3>配色生成器</h3>
+        <p>选择主色自动生成互补、类似、三角配色方案，含色阶展示和UI预览，支持历史记录。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="./gradient-generator.html">
+        <div class="icon">🌈</div>
+        <h3>渐变背景生成器</h3>
+        <p>自由搭配2-4个颜色生成CSS渐变背景，支持线性/径向/锥形渐变及10种艺术图案风格，一键复制CSS代码。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="https://hiseeu-yomiiii.github.io/prism-ai/" target="_blank" rel="noopener noreferrer">
+        <div class="icon">🔮</div>
+        <h3>棱镜 · PrismAI</h3>
+        <p>AI 多角色顾问团，由多个 AI 角色从不同视角给出反馈，支持求职材料打磨、竞赛答辩模拟、文章观点审视、商业计划评审四个场景。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="https://hiseeu-yomiiii.github.io/inkraft/" target="_blank" rel="noopener noreferrer">
+        <div class="icon">✒️</div>
+        <h3>墨推 · Inkraft</h3>
+        <p>针对中文论文写作场景设计的 AI 工具站，覆盖降重 / 润色 / 翻译全流程，集成 DeepSeek API + Cloudflare Worker 安全架构，支持流式输出与一键全套处理。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+    </div>
+  </section>
+
+  <footer>
+    © Cyrilla
+  </footer>
+
+</div>
+
+<script>
+  const themeToggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+
+  // Apply saved theme or system preference
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    root.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '☀️';
+  } else {
+    themeToggle.textContent = '🌙';
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      root.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+      themeToggle.textContent = '🌙';
+    } else {
+      root.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      themeToggle.textContent = '☀️';
+    }
+  });
+</script>
+
+</body>
+</html>
