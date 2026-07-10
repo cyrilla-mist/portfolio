@@ -314,7 +314,7 @@
     flex-grow: 1;
   }
 
-  .contest-tag {
+  .project-tag {
     font-size: 12px;
     background: var(--tag-bg);
     color: var(--primary);
@@ -323,6 +323,12 @@
     font-weight: 600;
     border: 1px solid var(--card-border);
     align-self: flex-start;
+  }
+
+  .core-tag {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    color: #fff;
+    border-color: transparent;
   }
 
   .project-card .link-arrow {
@@ -401,6 +407,7 @@
   <!-- Hero -->
   <header class="hero">
     <h1>Cyrilla's Portfolio</h1>
+    <p class="subtitle">面向学习、写作、竞赛与设计场景的 AI 工具作品集。</p>
   </header>
 
   <!-- Projects -->
@@ -408,26 +415,19 @@
     <h2 class="section-title">项目展示</h2>
     <div class="project-grid">
 
-      <a class="project-card" href="./ai-tools.html">
-        <div class="icon">🧭</div>
-        <h3>AI工具导航页</h3>
-        <p>收录 50+ 大学生常用 AI 与效率工具，支持搜索 / 收藏 / 标签筛选，帮助同学们快速找到合适的工具。</p>
+      <a class="project-card" href="https://hiseeu-yomiiii.github.io/inkraft/" target="_blank" rel="noopener noreferrer">
+        <div class="icon">✒️</div>
+        <h3>墨推 · Inkraft</h3>
+        <span class="project-tag core-tag">核心 AI 项目</span>
+        <p>面向大学生中文论文写作的 AI 优化助手，支持论文体检、降重、学术润色、摘要生成、翻译润色与参考文献格式化；加入改写质量检查，并采用 DeepSeek API + Cloudflare Worker 安全架构，辅助判断原意保持、新增信息风险和人工复核点。</p>
         <div class="link-arrow">查看项目 →</div>
       </a>
 
-      <a class="project-card" href="https://langqiao-d6g5zvk1wb73d079e-1435750613.tcloudbaseapp.com/bnpl.html" target="_blank" rel="noopener noreferrer">
-        <div class="icon">💳</div>
-        <h3>BNPL 先用后付网站</h3>
-        <span class="contest-tag">竞赛</span>
-        <p>面向先用后付金融产品的介绍网站，清晰展示产品特点与使用流程，竞赛项目作品。</p>
-        <div class="link-arrow">查看项目 →</div>
-      </a>
-
-      <a class="project-card" href="https://langqiao-d6g5zvk1wb73d079e-1435750613.tcloudbaseapp.com" target="_blank" rel="noopener noreferrer">
-        <div class="icon">🌉</div>
-        <h3>泰顺廊桥网站</h3>
-        <span class="contest-tag">竞赛</span>
-        <p>聚焦浙江泰顺廊桥文化的介绍网站，展现传统建筑之美与人文历史，竞赛项目作品。</p>
+      <a class="project-card" href="https://hiseeu-yomiiii.github.io/prism-ai/" target="_blank" rel="noopener noreferrer">
+        <div class="icon">🔮</div>
+        <h3>棱镜 · PrismAI</h3>
+        <span class="project-tag core-tag">核心 AI 项目</span>
+        <p>AI 多角色顾问团，由多个 AI 角色从不同视角给出反馈，支持求职材料打磨、竞赛答辩模拟、文章观点审视、商业计划评审四个场景。</p>
         <div class="link-arrow">查看项目 →</div>
       </a>
 
@@ -435,6 +435,13 @@
         <div class="icon">🧩</div>
         <h3>AI提示词工具箱</h3>
         <p>为大学生场景整理的提示词模板，覆盖写作、学习、PPT、求职等8个分类，点击复制直接使用。</p>
+        <div class="link-arrow">查看项目 →</div>
+      </a>
+
+      <a class="project-card" href="./ai-tools.html">
+        <div class="icon">🧭</div>
+        <h3>AI工具导航页</h3>
+        <p>收录 50+ 大学生常用 AI 与效率工具，支持搜索 / 收藏 / 标签筛选，帮助同学们快速找到合适的工具。</p>
         <div class="link-arrow">查看项目 →</div>
       </a>
 
@@ -452,17 +459,19 @@
         <div class="link-arrow">查看项目 →</div>
       </a>
 
-      <a class="project-card" href="https://hiseeu-yomiiii.github.io/prism-ai/" target="_blank" rel="noopener noreferrer">
-        <div class="icon">🔮</div>
-        <h3>棱镜 · PrismAI</h3>
-        <p>AI 多角色顾问团，由多个 AI 角色从不同视角给出反馈，支持求职材料打磨、竞赛答辩模拟、文章观点审视、商业计划评审四个场景。</p>
+      <a class="project-card" href="https://langqiao-d6g5zvk1wb73d079e-1435750613.tcloudbaseapp.com/bnpl.html" target="_blank" rel="noopener noreferrer">
+        <div class="icon">💳</div>
+        <h3>BNPL 先用后付网站</h3>
+        <span class="project-tag contest-tag">竞赛</span>
+        <p>面向先用后付金融产品的介绍网站，清晰展示产品特点与使用流程，竞赛项目作品。</p>
         <div class="link-arrow">查看项目 →</div>
       </a>
 
-      <a class="project-card" href="https://hiseeu-yomiiii.github.io/inkraft/" target="_blank" rel="noopener noreferrer">
-        <div class="icon">✒️</div>
-        <h3>墨推 · Inkraft</h3>
-        <p>面向大学生中文论文写作的 AI 优化助手，支持论文体检、降重、学术润色、摘要生成、翻译润色与参考文献格式化，并加入改写质量检查，辅助判断原意保持、新增信息风险和人工复核点。</p>
+      <a class="project-card" href="https://langqiao-d6g5zvk1wb73d079e-1435750613.tcloudbaseapp.com" target="_blank" rel="noopener noreferrer">
+        <div class="icon">🌉</div>
+        <h3>泰顺廊桥网站</h3>
+        <span class="project-tag contest-tag">竞赛</span>
+        <p>聚焦浙江泰顺廊桥文化的介绍网站，展现传统建筑之美与人文历史，竞赛项目作品。</p>
         <div class="link-arrow">查看项目 →</div>
       </a>
 
