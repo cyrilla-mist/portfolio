@@ -218,6 +218,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    cursor: pointer;
   }
 
   /* 顶部紫色渐变线条，hover 时出现 */
@@ -286,12 +287,13 @@
     opacity: 0.7;
   }
 
-  /* 按钮行：展开按钮 + 复制按钮 */
+  /* 按钮行：展开按钮 + 生成按钮 + 复制按钮 */
   .card-actions {
     display: flex;
     align-items: center;
     gap: 16px;
     margin-top: auto;
+    flex-wrap: wrap;
   }
 
   /* 占位符高亮 */
@@ -323,6 +325,212 @@
     color: #fff;
   }
 
+  .builder-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .builder-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+  }
+
+  /* ===== Prompt Builder 面板 ===== */
+  .builder-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(20, 16, 31, 0.45);
+  }
+
+  .builder-overlay.open {
+    display: flex;
+  }
+
+  .builder-panel {
+    width: min(920px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px var(--shadow);
+    padding: 24px;
+  }
+
+  .builder-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .builder-title-wrap {
+    min-width: 0;
+  }
+
+  .builder-kicker {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .builder-title {
+    color: var(--text);
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .close-builder {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: var(--tag-bg);
+    color: var(--primary);
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .builder-template {
+    margin-bottom: 18px;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--tag-bg);
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .builder-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .field-group.full {
+    grid-column: 1 / -1;
+  }
+
+  .field-group label {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .builder-input,
+  .builder-textarea,
+  .builder-result {
+    width: 100%;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .builder-input {
+    min-height: 42px;
+    padding: 10px 12px;
+  }
+
+  .builder-textarea {
+    min-height: 98px;
+    resize: vertical;
+    padding: 10px 12px;
+  }
+
+  .builder-input:focus,
+  .builder-textarea:focus,
+  .builder-result:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--tag-bg);
+  }
+
+  .builder-actions,
+  .result-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .builder-primary,
+  .builder-secondary {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  .builder-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .builder-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  .builder-secondary {
+    background: var(--tag-bg);
+    color: var(--primary);
+  }
+
+  .builder-secondary:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .builder-status {
+    min-height: 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .builder-result-wrap {
+    display: none;
+  }
+
+  .builder-result-wrap.show {
+    display: block;
+  }
+
+  .builder-result {
+    min-height: 170px;
+    padding: 12px;
+    resize: vertical;
+  }
+
   /* ===== 无结果提示 ===== */
   .no-result {
     text-align: center;
@@ -337,6 +545,42 @@
     padding: 20px;
     font-size: 12px;
     color: var(--text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .builder-overlay {
+      align-items: flex-start;
+      padding: 12px;
+    }
+
+    .builder-panel {
+      max-height: calc(100vh - 24px);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .builder-head {
+      gap: 10px;
+    }
+
+    .builder-title {
+      font-size: 19px;
+    }
+
+    .builder-form {
+      grid-template-columns: 1fr;
+    }
+
+    .builder-actions,
+    .result-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .builder-primary,
+    .builder-secondary {
+      width: 100%;
+    }
   }
 </style>
 </head>
@@ -368,7 +612,32 @@
     <div class="card-grid" id="cardGrid"></div>
   </div>
 
-  <footer>© 2026 Cyrilla · AI提示词工具箱</footer>
+  <div class="builder-overlay" id="builderOverlay" aria-hidden="true">
+    <div class="builder-panel" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
+      <div class="builder-head">
+        <div class="builder-title-wrap">
+          <div class="builder-kicker">Prompt Builder v1.1</div>
+          <h2 class="builder-title" id="builderTitle">填写生成 Prompt</h2>
+        </div>
+        <button class="close-builder" id="closeBuilder" type="button" title="关闭">×</button>
+      </div>
+      <div class="builder-template" id="builderTemplate"></div>
+      <form class="builder-form" id="builderForm"></form>
+      <div class="builder-actions">
+        <button class="builder-primary" id="generatePrompt" type="button">生成完整 Prompt</button>
+        <button class="builder-secondary" id="clearBuilder" type="button">清空填写内容</button>
+      </div>
+      <div class="builder-status" id="builderStatus"></div>
+      <div class="builder-result-wrap" id="builderResultWrap">
+        <textarea class="builder-result" id="builderResult" readonly></textarea>
+        <div class="result-actions">
+          <button class="builder-secondary" id="copyGenerated" type="button">复制生成结果</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2026 AI 提示词工具箱 · Cyrilla</footer>
 
 <script>
   // ===================== 数据部分 =====================
@@ -573,8 +842,20 @@
   const tabsEl = document.getElementById('tabs');
   const cardGridEl = document.getElementById('cardGrid');
   const searchInput = document.getElementById('searchInput');
+  const builderOverlay = document.getElementById('builderOverlay');
+  const builderTitle = document.getElementById('builderTitle');
+  const builderTemplate = document.getElementById('builderTemplate');
+  const builderForm = document.getElementById('builderForm');
+  const builderStatus = document.getElementById('builderStatus');
+  const builderResultWrap = document.getElementById('builderResultWrap');
+  const builderResult = document.getElementById('builderResult');
+  const closeBuilder = document.getElementById('closeBuilder');
+  const generatePrompt = document.getElementById('generatePrompt');
+  const clearBuilder = document.getElementById('clearBuilder');
+  const copyGenerated = document.getElementById('copyGenerated');
 
   let currentCategory = Object.keys(data)[0]; // 默认选中第一个分类
+  let activeTemplate = '';
 
   // 渲染分类 Tab
   function renderTabs() {
@@ -597,10 +878,121 @@
     return text.replace(/【[^】]*】/g, match => `<span class="placeholder">${match}</span>`);
   }
 
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // 识别中文方括号占位符，重复占位符只保留一个表单项
+  function extractPlaceholders(text) {
+    const matches = text.match(/【[^】]+】/g) || [];
+    return [...new Set(matches)];
+  }
+
+  function shouldUseTextarea(label) {
+    return /原文|内容|代码|日志|材料|素材|笔记|条款|信息|描述|要点|清单|题目/.test(label);
+  }
+
+  function copyText(text, button, defaultText) {
+    navigator.clipboard.writeText(text).then(() => {
+      button.textContent = '✓ 已复制';
+      button.classList.add('copied');
+      setTimeout(() => {
+        button.textContent = defaultText;
+        button.classList.remove('copied');
+      }, 1500);
+    });
+  }
+
+  function openBuilder(item) {
+    activeTemplate = item.template;
+    const placeholders = extractPlaceholders(item.template);
+
+    builderTitle.textContent = item.title;
+    builderTemplate.innerHTML = highlightPlaceholders(item.template);
+    builderForm.innerHTML = '';
+    builderStatus.textContent = placeholders.length
+      ? `已识别 ${placeholders.length} 个需要填写的占位符。`
+      : '这个模板没有识别到中文方括号占位符，可以直接复制原模板。';
+    builderResult.value = '';
+    builderResultWrap.classList.remove('show');
+
+    placeholders.forEach(placeholder => {
+      const labelText = placeholder.slice(1, -1);
+      const group = document.createElement('div');
+      const textarea = shouldUseTextarea(labelText);
+      group.className = 'field-group' + (textarea ? ' full' : '');
+
+      const label = document.createElement('label');
+      label.textContent = labelText;
+      label.setAttribute('for', `field-${labelText}`);
+
+      const field = document.createElement(textarea ? 'textarea' : 'input');
+      field.className = textarea ? 'builder-textarea' : 'builder-input';
+      field.id = `field-${labelText}`;
+      field.dataset.placeholder = placeholder;
+      field.placeholder = `填写${labelText}`;
+      if (!textarea) {
+        field.type = 'text';
+      }
+
+      group.appendChild(label);
+      group.appendChild(field);
+      builderForm.appendChild(group);
+    });
+
+    builderOverlay.classList.add('open');
+    builderOverlay.setAttribute('aria-hidden', 'false');
+
+    const firstField = builderForm.querySelector('input, textarea');
+    if (firstField) {
+      firstField.focus();
+    }
+  }
+
+  function closeBuilderPanel() {
+    builderOverlay.classList.remove('open');
+    builderOverlay.setAttribute('aria-hidden', 'true');
+  }
+
+  function clearBuilderFields() {
+    builderForm.querySelectorAll('input, textarea').forEach(field => {
+      field.value = '';
+    });
+    builderResult.value = '';
+    builderResultWrap.classList.remove('show');
+    builderStatus.textContent = '已清空填写内容。';
+  }
+
+  function buildPrompt() {
+    let result = activeTemplate;
+    let emptyCount = 0;
+
+    builderForm.querySelectorAll('input, textarea').forEach(field => {
+      const value = field.value.trim();
+      const placeholder = field.dataset.placeholder;
+      if (!value) {
+        emptyCount += 1;
+        return;
+      }
+      result = result.replace(new RegExp(escapeRegExp(placeholder), 'g'), value);
+    });
+
+    builderResult.value = result;
+    builderResultWrap.classList.add('show');
+    builderStatus.textContent = emptyCount
+      ? `已生成，${emptyCount} 个未填写项已保留原占位符。`
+      : '已生成完整 Prompt。';
+  }
+
   // 创建单个卡片元素
   function createCard(item) {
     const card = document.createElement('div');
     card.className = 'card';
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('button')) {
+        openBuilder(item);
+      }
+    });
 
     const title = document.createElement('div');
     title.className = 'card-title';
@@ -615,24 +1007,27 @@
     expandBtn.className = 'expand-btn';
     expandBtn.textContent = '展开 ▾';
 
+    const builderBtn = document.createElement('button');
+    builderBtn.className = 'builder-btn';
+    builderBtn.textContent = '填写生成';
+    builderBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openBuilder(item);
+    });
+
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-btn';
     copyBtn.textContent = '📋 一键复制';
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(item.template).then(() => {
-        copyBtn.textContent = '✓ 已复制';
-        copyBtn.classList.add('copied');
-        setTimeout(() => {
-          copyBtn.textContent = '📋 一键复制';
-          copyBtn.classList.remove('copied');
-        }, 1500);
-      });
+    copyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      copyText(item.template, copyBtn, '📋 一键复制');
     });
 
-    // 按钮行：展开按钮 + 复制按钮
+    // 按钮行：展开按钮 + 生成按钮 + 复制按钮
     const actions = document.createElement('div');
     actions.className = 'card-actions';
     actions.appendChild(expandBtn);
+    actions.appendChild(builderBtn);
     actions.appendChild(copyBtn);
 
     card.appendChild(title);
@@ -702,6 +1097,30 @@
       const isExpanded = text.classList.toggle('expanded');
       e.target.textContent = isExpanded ? '收起 ▴' : '展开 ▾';
       e.stopPropagation();
+    }
+  });
+
+  closeBuilder.addEventListener('click', closeBuilderPanel);
+  clearBuilder.addEventListener('click', clearBuilderFields);
+  generatePrompt.addEventListener('click', buildPrompt);
+
+  copyGenerated.addEventListener('click', () => {
+    if (!builderResult.value) {
+      builderStatus.textContent = '请先生成完整 Prompt。';
+      return;
+    }
+    copyText(builderResult.value, copyGenerated, '复制生成结果');
+  });
+
+  builderOverlay.addEventListener('click', (e) => {
+    if (e.target === builderOverlay) {
+      closeBuilderPanel();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && builderOverlay.classList.contains('open')) {
+      closeBuilderPanel();
     }
   });
 
