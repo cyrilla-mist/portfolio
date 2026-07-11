@@ -394,6 +394,13 @@
     line-height: 1.3;
   }
 
+  .builder-help {
+    margin: -4px 0 16px;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
   .close-builder {
     flex: 0 0 auto;
     width: 36px;
@@ -567,6 +574,16 @@
       font-size: 19px;
     }
 
+    .close-builder {
+      width: 40px;
+      height: 40px;
+      font-size: 22px;
+    }
+
+    .builder-help {
+      font-size: 13px;
+    }
+
     .builder-form {
       grid-template-columns: 1fr;
     }
@@ -616,14 +633,16 @@
     <div class="builder-panel" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
       <div class="builder-head">
         <div class="builder-title-wrap">
-          <div class="builder-kicker">Prompt Builder v1.1</div>
+          <div class="builder-kicker">Prompt Builder v1.1.1</div>
           <h2 class="builder-title" id="builderTitle">填写生成 Prompt</h2>
         </div>
         <button class="close-builder" id="closeBuilder" type="button" title="关闭">×</button>
       </div>
+      <p class="builder-help">填写下方字段后，系统会自动替换模板中的【占位符】，生成可直接复制使用的完整 Prompt。</p>
       <div class="builder-template" id="builderTemplate"></div>
       <form class="builder-form" id="builderForm"></form>
       <div class="builder-actions">
+        <button class="builder-secondary" id="fillExample" type="button">填入示例</button>
         <button class="builder-primary" id="generatePrompt" type="button">生成完整 Prompt</button>
         <button class="builder-secondary" id="clearBuilder" type="button">清空填写内容</button>
       </div>
@@ -850,6 +869,7 @@
   const builderResultWrap = document.getElementById('builderResultWrap');
   const builderResult = document.getElementById('builderResult');
   const closeBuilder = document.getElementById('closeBuilder');
+  const fillExample = document.getElementById('fillExample');
   const generatePrompt = document.getElementById('generatePrompt');
   const clearBuilder = document.getElementById('clearBuilder');
   const copyGenerated = document.getElementById('copyGenerated');
@@ -888,8 +908,39 @@
     return [...new Set(matches)];
   }
 
+  function getPlaceholderName(placeholder) {
+    return placeholder
+      .replace(/^【|】$/g, '')
+      .replace(/（.*?）|\(.*?\)/g, '')
+      .split(/[，,；;：:、/／]/)[0]
+      .trim();
+  }
+
+  function formatPlaceholderSummary(placeholders) {
+    const names = placeholders.map(getPlaceholderName).filter(Boolean);
+    const preview = names.slice(0, 5).join('、');
+    const suffix = names.length > 5 ? '等' : '';
+    return `已识别 ${placeholders.length} 个占位符：${preview}${suffix}`;
+  }
+
   function shouldUseTextarea(label) {
     return /原文|内容|代码|日志|材料|素材|笔记|条款|信息|描述|要点|清单|题目/.test(label);
+  }
+
+  function getExampleValue(label) {
+    const name = getPlaceholderName(label);
+    const rawLabel = label.replace(/^【|】$/g, '');
+
+    if (/主题/.test(name) || /主题/.test(rawLabel)) return '大学生时间管理';
+    if (/字数/.test(name) || /字数/.test(rawLabel)) return '800字';
+    if (/风格/.test(name) || /风格/.test(rawLabel)) return '清晰、有条理';
+    if (/原文/.test(name) || /原文/.test(rawLabel)) return '这里是一段需要处理的示例文本';
+    if (/内容/.test(name) || /内容/.test(rawLabel)) return '这里是一段需要分析或改写的示例内容';
+    if (/角色/.test(name) || /角色/.test(rawLabel)) return '专业写作助手';
+    if (/输出格式/.test(name) || /输出格式/.test(rawLabel)) return '分点输出';
+    if (/目标/.test(name) || /目标/.test(rawLabel)) return '提高表达清晰度';
+
+    return '请根据实际需求填写';
   }
 
   function copyText(text, button, defaultText) {
@@ -911,7 +962,7 @@
     builderTemplate.innerHTML = highlightPlaceholders(item.template);
     builderForm.innerHTML = '';
     builderStatus.textContent = placeholders.length
-      ? `已识别 ${placeholders.length} 个需要填写的占位符。`
+      ? formatPlaceholderSummary(placeholders)
       : '这个模板没有识别到中文方括号占位符，可以直接复制原模板。';
     builderResult.value = '';
     builderResultWrap.classList.remove('show');
@@ -930,6 +981,7 @@
       field.className = textarea ? 'builder-textarea' : 'builder-input';
       field.id = `field-${labelText}`;
       field.dataset.placeholder = placeholder;
+      field.dataset.label = labelText;
       field.placeholder = `填写${labelText}`;
       if (!textarea) {
         field.type = 'text';
@@ -961,6 +1013,21 @@
     builderResult.value = '';
     builderResultWrap.classList.remove('show');
     builderStatus.textContent = '已清空填写内容。';
+  }
+
+  function fillExampleFields() {
+    const fields = builderForm.querySelectorAll('input, textarea');
+    if (!fields.length) {
+      builderStatus.textContent = '这个模板没有可填写的占位符。';
+      return;
+    }
+
+    fields.forEach(field => {
+      field.value = getExampleValue(field.dataset.label || field.dataset.placeholder || '');
+    });
+    builderResult.value = '';
+    builderResultWrap.classList.remove('show');
+    builderStatus.textContent = '已填入示例内容，可继续修改后生成。';
   }
 
   function buildPrompt() {
@@ -1101,6 +1168,7 @@
   });
 
   closeBuilder.addEventListener('click', closeBuilderPanel);
+  fillExample.addEventListener('click', fillExampleFields);
   clearBuilder.addEventListener('click', clearBuilderFields);
   generatePrompt.addEventListener('click', buildPrompt);
 
