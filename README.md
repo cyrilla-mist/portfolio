@@ -14,7 +14,6 @@
 
 面向早期想法孵化的 AI 协作工具，由 Nexus Core 理解目标，并通过 Project Atlas 逐步澄清、拆解与整理，帮助用户把模糊想法推进为更可执行的项目方案。
 
-- [在线体验](https://cyrilla-mist.github.io/nexus-ai/)
 - [GitHub 仓库](https://github.com/cyrilla-mist/nexus-ai)
 
 ### 衡准 · Verity
