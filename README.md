@@ -16,6 +16,13 @@
 
 - [GitHub 仓库](https://github.com/cyrilla-mist/nexus-ai)
 
+### English Radar
+
+Real internet English learning and personal language knowledge system. v1.0.
+
+- [Live Site](https://cyrilla-mist.github.io/english-radar/)
+- [GitHub repository](https://github.com/cyrilla-mist/english-radar)
+
 ### 衡准 · Verity
 
 项目材料 AI 质检与评审工具，支持材料分析、五维评分、评审追问模拟和修改行动清单，帮助项目团队在提交前发现逻辑问题、证据缺口与表达风险。
