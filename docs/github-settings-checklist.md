@@ -23,7 +23,7 @@ Do not use primary pin space for competition snapshots, demo fixtures, or earlie
 | --- | --- | --- | --- | --- |
 | `sideglance` | current product | description good; topics empty | missing | only repo still using `master`; migrate to `main` only with Pages/workflow refs checked |
 | `statewake` | completed deployed product | complete | Cloud Run present | no urgent settings cleanup |
-| `nexus-ai` | canonical long-term product | description/topics missing | missing | use branch cleanup audit before manual deletion |
+| `nexus-ai` | canonical long-term product | description/topics missing | missing | 45 non-main branches fully audited: 43 safe cleanup candidates, 2 preserved |
 | `english-radar` | maintenance / Radar foundation | description/topics missing | missing | 25 non-main branches fully audited; preserve migration assets |
 | `verity` | maintained independent capability | description/topics missing | missing | keep independent |
 | `portfolio` | public hub / Web Lab | description/topics missing | missing | pin as public entry point |
@@ -282,11 +282,25 @@ Sideglance Radar branches with unique commits must be preserved until their usef
 
 ### `nexus-ai`
 
-Use:
+Use the complete audit:
 
 [`nexus-ai/docs/BRANCH_CLEANUP_AUDIT_2026-09-17.md`](https://github.com/cyrilla-mist/nexus-ai/blob/main/docs/BRANCH_CLEANUP_AUDIT_2026-09-17.md)
 
-Verified `ahead_by=0` branches are safe manual deletion candidates. `agent/deepseek-project-atlas` contains confirmed unique work and must not be bulk-deleted.
+Audit result at September 17, 2026:
+
+```text
+43 verified safe cleanup candidates (ahead_by = 0)
+2 preserved branches with unique commits
+```
+
+Every non-`main` branch present at audit time has been classified.
+
+Preserve:
+
+- `agent/deepseek-project-atlas`
+- `agent/project-atlas-product-experience`
+
+All other audited non-`main` branches are safe manual deletion candidates after a final GitHub UI sanity check.
 
 ### `inkraft`
 
