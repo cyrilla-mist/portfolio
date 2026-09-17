@@ -2,6 +2,7 @@
 
 Earlier AI writing-assistant experiment for Chinese academic writing workflows.
 
-The historical standalone repository is preserved at https://github.com/cyrilla-mist/inkraft.
+- Live site: https://cyrilla-mist.github.io/inkraft/
+- Source and Git history: https://github.com/cyrilla-mist/inkraft
 
-This directory is the maintained Portfolio home for the experiment.
+This Portfolio directory is an index entry only. The standalone Inkraft repository remains the source of record until a safe physical repository migration is performed.
