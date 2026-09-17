@@ -60,12 +60,12 @@ An earlier multi-role AI review experiment that compares feedback from different
 
 Small browser-based utilities and interface experiments live under the portfolio rather than as separate product repositories.
 
-- [Prompt Builder](https://cyrilla-mist.github.io/portfolio/prompt-tools.html)
-- [AI Tools Directory](https://cyrilla-mist.github.io/portfolio/ai-tools.html)
-- [Color Palette Generator](https://cyrilla-mist.github.io/portfolio/color-palette.html)
-- [Gradient Generator](https://cyrilla-mist.github.io/portfolio/gradient-generator.html)
+- [Prompt Builder](https://cyrilla-mist.github.io/portfolio/lab/prompt-builder/)
+- [AI Tools Directory](https://cyrilla-mist.github.io/portfolio/lab/ai-tools/)
+- [Color Palette Generator](https://cyrilla-mist.github.io/portfolio/lab/color-palette/)
+- [Gradient Generator](https://cyrilla-mist.github.io/portfolio/lab/gradient-generator/)
 
-The current URLs are intentionally preserved while the lab is being reorganized into a clearer directory structure.
+The original root-level URLs are intentionally preserved for compatibility while the Web Lab uses the cleaner directory-based paths above.
 
 ## Repository Role
 
@@ -74,11 +74,16 @@ This repository is the public presentation layer for my work. Larger products ke
 ```text
 portfolio/
 ├── index.html
-├── lab/                      Web Lab landing page
-├── ai-tools.html             legacy URL kept during migration
-├── prompt-tools.html         legacy URL kept during migration
-├── color-palette.html        legacy URL kept during migration
-└── gradient-generator.html   legacy URL kept during migration
+├── lab/
+│   ├── index.html
+│   ├── prompt-builder/index.html
+│   ├── ai-tools/index.html
+│   ├── color-palette/index.html
+│   └── gradient-generator/index.html
+├── prompt-tools.html         legacy URL preserved
+├── ai-tools.html             legacy URL preserved
+├── color-palette.html        legacy URL preserved
+└── gradient-generator.html   legacy URL preserved
 ```
 
 ## Technology
