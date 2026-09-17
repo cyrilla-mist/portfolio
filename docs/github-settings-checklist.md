@@ -1,6 +1,6 @@
 # GitHub Settings Checklist
 
-This file records GitHub presentation and repository settings that live outside normal repository files. The connected GitHub tools can inspect these values but cannot currently edit repository About metadata, archive repositories, change the default branch, delete branches, or manage profile pins directly.
+This file records GitHub presentation and repository settings that live outside normal repository files. The connected GitHub tools can inspect these values but cannot currently edit repository About metadata, archive repositories, change the default branch, delete branches, manage profile pins, or edit GitHub Release metadata directly.
 
 Last reviewed: **September 17, 2026**.
 
@@ -316,11 +316,63 @@ The consolidated workflow validates the full test suite, repository checks, secu
 
 ### `english-radar`
 
-One `English Radar maintenance checks` workflow remains. It runs on Node 22 and is green after README / workflow-contract cleanup and the branch-audit documentation update.
+One `English Radar maintenance checks` workflow remains. It runs on Node 22 and is green after README / workflow-contract cleanup, branch-audit documentation, diagnostics indexing hygiene, and test-suite mapping.
 
 ### `sideglance`
 
 One GitHub Pages deployment workflow remains. No workflow cleanup is currently needed.
+
+## Release / Tag Hygiene
+
+All ten public repositories were audited on September 17, 2026.
+
+### No tags / releases
+
+The following repositories currently have no Git tags and no GitHub Releases:
+
+- `sideglance`
+- `statewake`
+- `verity`
+- `portfolio`
+- `inkraft`
+- `prism-ai`
+- `statewake-demo-project`
+
+This is not a defect. Do not create cosmetic releases merely to make repository metadata look fuller.
+
+### `nexus-ai`
+
+The repository has one historical tag/release:
+
+```text
+v0.1.1 — Nexus AI / Project Atlas Experience
+```
+
+It predates the stable Nexus Atlas identity and architecture. Preserve it as provenance, but do not treat it as the current Nexus Atlas version. The distinction is documented in `nexus-ai/docs/README.md`.
+
+### `english-radar`
+
+The standalone English Radar version line includes tags through `v1.8.3`.
+
+The repository also contains a later-published:
+
+```text
+v0.1.0 — Sideglance Radar / Context Learning Loop
+```
+
+That `v0.1.0` release is migration / product-direction history hosted in the English Radar repository. It does **not** supersede English Radar `v1.8.3` and does not mean the repositories have been physically merged. This release-channel distinction is documented in `english-radar/docs/README.md`.
+
+If the GitHub Release metadata is manually edited later, consider labeling the Sideglance Radar release as a historical migration preview / prerelease rather than deleting the tag.
+
+### `nexus-atlas-datahub-2026`
+
+The snapshot has one matching tag and release:
+
+```text
+v0.1-hackathon — Nexus Atlas DataHub Hackathon 2026 Submission
+```
+
+This is appropriate for a frozen competition snapshot and should be preserved as historical submission evidence.
 
 ## Repository Hygiene Defaults
 
@@ -331,7 +383,8 @@ Do not enable a workflow that would accidentally remove intentionally long-lived
 Keep these rules:
 
 - do not add licenses merely to make metadata look complete;
+- do not create releases merely for visual completeness;
 - do not archive evidence repositories that an active demo still reads;
 - do not delete a branch with `ahead_by > 0` without reviewing its unique work;
 - keep competition snapshots clearly separated from canonical long-term repositories;
-- review profile pins, About metadata, homepage links, topics, default branches, archived state, and Pages links every few months.
+- review profile pins, About metadata, homepage links, topics, default branches, archived state, Pages links, tags, and releases every few months.
