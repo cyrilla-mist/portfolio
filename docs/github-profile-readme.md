@@ -19,7 +19,7 @@ An interrupted-work recovery agent built around **Validate before Recover** — 
 Personal intelligence infrastructure for restoring project context, tracing decisions, preserving evidence and provenance, and continuing long-running work.
 
 ### [English Radar](https://github.com/cyrilla-mist/english-radar)
-A local-first learning system for real internet English through context, tone, usage boundaries, pronunciation, review, and personal mastery. It is also the learning-system foundation for Sideglance Radar.
+A local-first learning system for real internet English through context, tone, usage boundaries, pronunciation, review, and personal mastery. `v1.8.3` is the stable standalone maintenance line; the repository's current `main` branch hosts a Sideglance Radar migration preview built from the same learning-system foundation.
 
 ### [Verity](https://github.com/cyrilla-mist/verity)
 AI-assisted pre-submission review for project materials, evidence coverage, likely reviewer questions, and prioritized revision actions.
