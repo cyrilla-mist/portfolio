@@ -1,6 +1,8 @@
 # GitHub Settings Checklist
 
-Some important GitHub presentation settings live outside repository files. The current connector can inspect them but cannot edit them directly, so this file records the intended values for manual cleanup.
+This file records GitHub presentation and repository settings that live outside normal repository files. The connected GitHub tools can inspect these values but cannot currently edit repository About metadata, archive repositories, change the default branch, delete branches, or manage profile pins directly.
+
+Last reviewed: **September 17, 2026**.
 
 ## Profile Pins
 
@@ -13,23 +15,38 @@ Recommended six pinned repositories, in order:
 5. `verity`
 6. `portfolio`
 
-Do not use primary pin space for competition snapshots, demo fixtures, or earlier experiments unless there is a temporary reason to showcase one.
+Do not use primary pin space for competition snapshots, demo fixtures, or earlier experiments.
 
-## Repository About Settings
+## Repository Settings Matrix
+
+| Repository | Role | About state | Homepage | Branch / archive note |
+| --- | --- | --- | --- | --- |
+| `sideglance` | current product | description good; topics empty | missing | only repo still using `master`; migrate to `main` only with Pages/workflow refs checked |
+| `statewake` | completed deployed product | complete | Cloud Run present | no urgent settings cleanup |
+| `nexus-ai` | canonical long-term product | description/topics missing | missing | use branch cleanup audit before manual deletion |
+| `english-radar` | maintenance / Radar foundation | description/topics missing | missing | 25 non-main branches fully audited; preserve migration assets |
+| `verity` | maintained independent capability | description/topics missing | missing | keep independent |
+| `portfolio` | public hub / Web Lab | description/topics missing | missing | pin as public entry point |
+| `inkraft` | earlier experiment | description/topics missing | blank | stale `master` is safe deletion candidate |
+| `prism-ai` | earlier experiment | description/topics missing | blank | keep visually secondary |
+| `nexus-atlas-datahub-2026` | competition snapshot | **stale description** | missing | archive after confirming historical Pages demo should remain |
+| `statewake-demo-project` | controlled evidence fixture | description/topics missing | not needed | do **not** archive while STATEWAKE uses it as evidence |
+
+## Exact About Values
 
 ### `sideglance`
 
-Current description is already good:
+Keep the current description:
 
 > Context intelligence for the internet — understand what people mean, not just what the words say.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/sideglance/
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 context-intelligence
@@ -42,29 +59,23 @@ typescript
 vite
 ```
 
-Default branch is currently `master`. Rename / migrate to `main` only through GitHub repository settings with deployment references checked at the same time.
-
 ### `statewake`
 
-Current About metadata is already in good shape: description, Cloud Run homepage, MIT license, and relevant Google / agent topics are present.
-
-No urgent settings cleanup required.
+Already in good shape: description, Cloud Run homepage, MIT license, and Google / agent topics are present.
 
 ### `nexus-ai`
 
-Current GitHub description and homepage are blank even though this is a flagship repository.
-
-Recommended description:
+Description:
 
 > Personal intelligence infrastructure for restoring project context, tracing decisions, and continuing long-running work.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/nexus-ai/atlas.html
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 context-engineering
@@ -77,23 +88,21 @@ javascript
 cloudflare-workers
 ```
 
-Apache-2.0 is already detected from the repository license.
+Apache-2.0 is already detected.
 
 ### `english-radar`
 
-Current GitHub description, homepage, and topics are blank.
-
-Recommended description:
+Description:
 
 > Local-first learning for real internet English through context, tone, usage boundaries, review, and personal mastery.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/english-radar/
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 language-learning
@@ -105,23 +114,21 @@ javascript
 github-pages
 ```
 
-The repository currently has no detected license. Choose a license only if public reuse is intentionally allowed; do not add one merely for visual completeness.
+No detected license. Add one only if public reuse is intentionally allowed.
 
 ### `verity`
 
-Current GitHub description, homepage, and topics are blank.
-
-Recommended description:
+Description:
 
 > AI-assisted pre-submission review for project materials, evidence coverage, reviewer questions, and revision priorities.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/verity/
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 ai-review
@@ -132,23 +139,21 @@ javascript
 github-pages
 ```
 
-The repository currently has no detected license. Treat licensing as a deliberate legal / reuse decision rather than a cosmetic setting.
+No detected license. Licensing should remain a deliberate reuse decision rather than a cosmetic setting.
 
 ### `portfolio`
 
-Current GitHub description, homepage, and topics are blank.
-
-Recommended description:
+Description:
 
 > Cyrilla's selected products, earlier experiments, and lightweight Web Lab.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/portfolio/
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 portfolio
@@ -160,19 +165,17 @@ github-pages
 
 ### `inkraft`
 
-This is an earlier experiment and should stay visually secondary to the current product repositories.
-
-Recommended description:
+Description:
 
 > Earlier AI writing experiment for Chinese academic-writing workflows. Maintained minimally.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/inkraft/
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 ai-writing
@@ -182,23 +185,21 @@ github-pages
 legacy-project
 ```
 
-Do not pin it. Keep public while it remains useful as development history; archiving is optional rather than urgent because the live demo remains usable.
+Do not pin. Archiving is optional while the live demo remains intentionally available.
 
 ### `prism-ai`
 
-This is also an earlier experiment and should stay visually secondary.
-
-Recommended description:
+Description:
 
 > Earlier multi-role AI review experiment for comparing reviewer perspectives and prioritizing revisions.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/prism-ai/
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 ai-review
@@ -208,25 +209,25 @@ github-pages
 legacy-project
 ```
 
-Do not pin it. Archiving is optional while the live demo remains intentionally available.
+Do not pin. Archiving is optional while the live demo remains intentionally available.
 
 ### `nexus-atlas-datahub-2026`
 
-**Current About description is stale** and still says:
+Current stale description:
 
 > Nexus Atlas — DataHub Hackathon 2026 submission candidate
 
-The README is already frozen as an archived submitted snapshot, so change the About description to:
+Replace with:
 
 > Archived Nexus Atlas submission for Build with DataHub: The Agent Hackathon 2026.
 
-Recommended website:
+Website:
 
 ```text
 https://cyrilla-mist.github.io/nexus-atlas-datahub-2026/
 ```
 
-Recommended topics:
+Topics:
 
 ```text
 hackathon
@@ -236,17 +237,15 @@ context-engineering
 archived-project
 ```
 
-Recommended repository setting: **Archive this repository** after confirming the public demo should remain as a historical snapshot. The canonical long-term repository is `nexus-ai`.
+Archive this repository after confirming the historical Pages demo should remain available. The canonical long-term repository is `nexus-ai`.
 
 ### `statewake-demo-project`
 
-This is a controlled evidence fixture, not a second STATEWAKE product.
-
-Recommended description:
+Description:
 
 > Controlled external project evidence used by the STATEWAKE recovery demo; not the STATEWAKE source repository.
 
-Recommended topics:
+Topics:
 
 ```text
 statewake
@@ -254,72 +253,71 @@ demo-fixture
 project-evidence
 ```
 
-Do not archive while the live STATEWAKE demo depends on its GitHub evidence. Issue #1 is intentionally open as scenario evidence and is documented in the repository README.
+Do not archive while the STATEWAKE demo depends on it. Issue #1 is intentionally open as controlled scenario evidence.
 
-## Branch Cleanup Settings
+## Branch Cleanup
 
 ### `sideglance`
 
-Only one branch exists (`master`). If standardizing to `main`, change the GitHub default branch and any Pages / workflow references together. Do not create a second long-lived branch without changing the default.
+Only one branch exists: `master`.
+
+If standardizing to `main`, change the GitHub default branch and any Pages / workflow references together. Do not create a second long-lived branch without changing the default.
 
 ### `english-radar`
 
-The repository currently has many historical release and Radar migration branches.
+Use the complete audit:
 
-Use [`SIDEGLANCE_RADAR_MIGRATION_ASSETS.md`](https://github.com/cyrilla-mist/english-radar/blob/main/docs/SIDEGLANCE_RADAR_MIGRATION_ASSETS.md) before deleting branches.
+[`english-radar/docs/BRANCH_CLEANUP_AUDIT_2026-09-17.md`](https://github.com/cyrilla-mist/english-radar/blob/main/docs/BRANCH_CLEANUP_AUDIT_2026-09-17.md)
 
-Known Sideglance Radar migration branches with unique assets must be preserved. In particular, `feat/sideglance-radar-v0.2-signal-v2-foundation` has confirmed commits not present on `main`. Historical release branches with `ahead_by=0` can be deleted after verification.
+Audit result at September 17, 2026:
+
+```text
+12 verified safe cleanup candidates (ahead_by = 0)
+13 branches requiring preservation / review
+```
+
+Every non-`main` branch present at audit time has been classified.
+
+Sideglance Radar branches with unique commits must be preserved until their useful assets have an explicit destination. Product-level migration details remain in [`SIDEGLANCE_RADAR_MIGRATION_ASSETS.md`](https://github.com/cyrilla-mist/english-radar/blob/main/docs/SIDEGLANCE_RADAR_MIGRATION_ASSETS.md).
 
 ### `nexus-ai`
 
-The repository accumulated many development branches. Use [`BRANCH_CLEANUP_AUDIT_2026-09-17.md`](https://github.com/cyrilla-mist/nexus-ai/blob/main/docs/BRANCH_CLEANUP_AUDIT_2026-09-17.md) as the cleanup record.
+Use:
 
-At least one branch, `agent/deepseek-project-atlas`, contains confirmed unique work and must not be bulk-deleted. Verified `ahead_by=0` branches listed in the audit are safe manual cleanup candidates.
+[`nexus-ai/docs/BRANCH_CLEANUP_AUDIT_2026-09-17.md`](https://github.com/cyrilla-mist/nexus-ai/blob/main/docs/BRANCH_CLEANUP_AUDIT_2026-09-17.md)
+
+Verified `ahead_by=0` branches are safe manual deletion candidates. `agent/deepseek-project-atlas` contains confirmed unique work and must not be bulk-deleted.
 
 ### `inkraft`
 
-`master` is a stale historical branch with `ahead_by=0` and is behind `main`. It is a safe manual deletion candidate after a final UI check.
+`master` has `ahead_by=0` and is behind `main`; it is a safe manual deletion candidate after a final UI check.
 
-## Actions / CI State
+## CI / Actions State
 
 ### `nexus-ai`
 
-Historical Phase 4–8 and integration-repair workflows have been consolidated into one long-term `.github/workflows/ci.yml` workflow for `main` and pull requests.
+Historical Phase 4–8 and integration-repair workflows were consolidated into one long-term `Nexus Atlas CI` workflow for `main` and pull requests.
 
-The consolidated workflow runs the full test suite, repository checks, security contracts, Verity continuity / DataHub checks, ingestion dry-run, and diff hygiene. Its first run after consolidation completed successfully.
+The consolidated workflow validates the full test suite, repository checks, security contracts, Verity continuity / DataHub contracts, ingestion dry-run, and diff hygiene. Post-cleanup runs are green.
 
 ### `english-radar`
 
-One maintenance workflow remains. No phase-per-release workflow cleanup is currently needed.
+One `English Radar maintenance checks` workflow remains. It runs on Node 22 and is green after README / workflow-contract cleanup and the branch-audit documentation update.
 
 ### `sideglance`
 
 One GitHub Pages deployment workflow remains. No workflow cleanup is currently needed.
 
-## Repository Settings Hygiene
+## Repository Hygiene Defaults
 
-For active repositories, consider enabling **Automatically delete head branches** after merged pull requests. This prevents the kind of branch accumulation currently visible in Nexus Atlas and English Radar.
+For ordinary active repositories, consider enabling **Automatically delete head branches** after merged pull requests.
 
-Before enabling it on repositories that use long-lived migration branches, confirm those branches are not being merged-and-reused intentionally.
+Do not enable a workflow that would accidentally remove intentionally long-lived migration branches without first checking how those branches are used.
 
-## License Rule
+Keep these rules:
 
-Do not add licenses merely to make repository metadata look complete.
-
-A missing detected license means reuse rights have not been explicitly granted through a recognized repository license. Choose one only when the intended reuse policy is clear.
-
-## Settings Review Cadence
-
-A lightweight review every few months is enough:
-
-- pinned repositories;
-- About description;
-- website link;
-- topics;
-- default branch;
-- stale branches;
-- archived / maintenance status;
-- license detection;
-- Pages deployment link.
-
-Last reviewed: September 2026.
+- do not add licenses merely to make metadata look complete;
+- do not archive evidence repositories that an active demo still reads;
+- do not delete a branch with `ahead_by > 0` without reviewing its unique work;
+- keep competition snapshots clearly separated from canonical long-term repositories;
+- review profile pins, About metadata, homepage links, topics, default branches, archived state, and Pages links every few months.
