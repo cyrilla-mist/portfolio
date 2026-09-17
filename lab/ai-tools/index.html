@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 工具导航</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --header-border: #f0f0f0;
+      --title-color: #111;
+      --sub-color: #888;
+      --search-border: #e0e0e0;
+      --search-bg: #fafafa;
+      --search-bg-focus: #fff;
+      --search-placeholder: #bbb;
+      --section-title-color: #999;
+      --section-border: #f0f0f0;
+      --card-border: #ebebeb;
+      --card-bg: #fff;
+      --card-border-hover: #d0d0d0;
+      --card-shadow-hover: rgba(0,0,0,.06);
+      --card-name-color: #111;
+      --card-desc-color: #777;
+      --footer-color: #ccc;
+      --footer-border: #f4f4f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #15171a;
+      --text: #e6e6e6;
+      --header-border: #26292e;
+      --title-color: #f5f5f5;
+      --sub-color: #9a9a9a;
+      --search-border: #34373c;
+      --search-bg: #1d2024;
+      --search-bg-focus: #23262b;
+      --search-placeholder: #6b6b6b;
+      --section-title-color: #888;
+      --section-border: #26292e;
+      --card-border: #2a2d32;
+      --card-bg: #1c1f23;
+      --card-border-hover: #3c4046;
+      --card-shadow-hover: rgba(0,0,0,.4);
+      --card-name-color: #f0f0f0;
+      --card-desc-color: #999;
+      --footer-color: #555;
+      --footer-border: #24272b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background .25s, color .25s;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      padding: 48px 40px 32px;
+      border-bottom: 1px solid var(--header-border);
+      transition: border-color .25s;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--title-color);
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    header p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--sub-color);
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    /* ── Theme toggle ── */
+    #theme-toggle {
+      position: absolute;
+      top: 48px;
+      right: 40px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--search-border);
+      border-radius: 10px;
+      background: var(--search-bg);
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    #theme-toggle:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-1px);
+    }
+
+    /* ── Layout ── */
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 40px 40px 80px;
+    }
+
+    /* ── Sidebar nav ── */
+    #sidebar {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      max-width: 80vw;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 24px 14px;
+      border-right: 1px solid var(--header-border);
+      background: var(--bg);
+      transform: translateX(-100%);
+      transition: transform .25s ease, border-color .25s, background .25s;
+      box-shadow: 4px 0 24px rgba(0,0,0,.15);
+      z-index: 100;
+    }
+    #sidebar.open {
+      transform: translateX(0);
+    }
+    #sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 90;
+    }
+    #sidebar-backdrop.open {
+      display: block;
+    }
+
+    /* ── Mobile menu toggle ── */
+    #menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 48px;
+      left: 40px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--search-border);
+      border-radius: 10px;
+      background: var(--search-bg);
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    #menu-toggle:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-1px);
+    }
+    #sidebar a {
+      display: block;
+      padding: 7px 12px;
+      margin-bottom: 2px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--sub-color);
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background .15s, color .15s;
+    }
+    #sidebar a:hover {
+      background: var(--search-bg);
+      color: var(--text);
+    }
+    #sidebar a.active {
+      background: var(--search-bg);
+      color: var(--card-name-color);
+      font-weight: 600;
+    }
+
+    @media (min-width: 1300px) {
+      #sidebar {
+        width: 200px;
+        max-width: 200px;
+        transform: none;
+        box-shadow: none;
+        transition: border-color .25s, background .25s;
+      }
+      #sidebar-backdrop { display: none !important; }
+      #menu-toggle { display: none; }
+      header, main, footer { margin-left: 200px; }
+    }
+
+    /* ── Search ── */
+    .search-wrap {
+      margin-bottom: 16px;
+    }
+    #search {
+      width: 100%;
+      max-width: 420px;
+      padding: 10px 16px;
+      border: 1px solid var(--search-border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s, background .2s, color .2s;
+      background: var(--search-bg);
+      color: var(--text);
+    }
+    #search:focus { border-color: #bbb; background: var(--search-bg-focus); }
+    #search::placeholder { color: var(--search-placeholder); }
+
+    /* ── Section ── */
+    .section { margin-bottom: 48px; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--section-title-color);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--section-border);
+      transition: border-color .25s, color .25s;
+    }
+    .cat-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      margin-right: 8px;
+      font-size: 12px;
+      flex-shrink: 0;
+      background: color-mix(in srgb, var(--cat-color) 18%, transparent);
+    }
+    #sidebar a .cat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      margin-right: 6px;
+    }
+    #sidebar a {
+      display: flex;
+      align-items: center;
+    }
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--section-border);
+      transition: border-color .25s;
+    }
+    .section-title-row .section-title {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    #refresh-recommend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border: 1px solid var(--search-border);
+      border-radius: 8px;
+      background: var(--search-bg);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    #refresh-recommend:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-1px);
+    }
+
+    /* ── Collapse button ── */
+    .collapse-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin-left: 8px;
+      border: 1px solid var(--search-border);
+      border-radius: 8px;
+      background: var(--search-bg);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    .collapse-btn:hover {
+      border-color: var(--card-border-hover);
+    }
+    .collapse-btn .arrow {
+      display: inline-block;
+      transition: transform .2s;
+    }
+    .section.collapsed .collapse-btn .arrow {
+      transform: rotate(-90deg);
+    }
+    .section.collapsed .grid {
+      display: none;
+    }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    /* ── Card ── */
+    .card {
+      position: relative;
+      display: block;
+      padding: 16px 40px 16px 18px;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      background: var(--card-bg);
+      transition: border-color .18s, box-shadow .18s, transform .15s, background .25s;
+    }
+    .card:hover {
+      border-color: var(--card-border-hover);
+      box-shadow: 0 4px 16px var(--card-shadow-hover);
+      transform: translateY(-1px);
+    }
+    .card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--card-name-color);
+      margin-bottom: 5px;
+      transition: color .25s;
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--card-desc-color);
+      line-height: 1.55;
+      transition: color .25s;
+    }
+
+    /* ── Favorite star ── */
+    .star-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 26px;
+      height: 26px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      color: var(--card-border-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: color .15s, transform .1s, background .15s;
+    }
+    .star-btn:hover {
+      background: var(--search-bg);
+      transform: scale(1.15);
+    }
+    .star-btn.active {
+      color: #f5b400;
+    }
+
+    /* ── Favorite filter button ── */
+    #fav-filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 10px;
+      padding: 10px 16px;
+      border: 1px solid var(--search-border);
+      border-radius: 8px;
+      background: var(--search-bg);
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      vertical-align: top;
+      transition: border-color .2s, background .2s, color .2s;
+    }
+    #fav-filter:hover {
+      border-color: var(--card-border-hover);
+    }
+    #fav-filter.active {
+      border-color: #f5b400;
+      background: rgba(245, 180, 0, .12);
+      color: #b8860b;
+    }
+    [data-theme="dark"] #fav-filter.active {
+      color: #f5d36a;
+    }
+
+    /* ── Card tags ── */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .card-tags .tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--search-bg);
+      color: var(--sub-color);
+      border: 1px solid var(--search-border);
+      transition: background .25s, color .25s, border-color .25s;
+    }
+
+    /* ── Tag filter ── */
+    #tag-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 40px;
+    }
+    #tag-filter .tag-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--search-border);
+      border-radius: 999px;
+      background: var(--search-bg);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, color .2s;
+    }
+    #tag-filter .tag-btn:hover {
+      border-color: var(--card-border-hover);
+    }
+    #tag-filter .tag-btn.active {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, .12);
+      color: #6366f1;
+    }
+    [data-theme="dark"] #tag-filter .tag-btn.active {
+      color: #a5b4fc;
+    }
+
+    /* ── Hidden ── */
+    .card.hidden, .section.hidden { display: none; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--footer-color);
+      border-top: 1px solid var(--footer-border);
+      transition: color .25s, border-color .25s;
+    }
+
+    /* ── Mobile responsiveness ── */
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      #recommend-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 600px) {
+      header {
+        padding: 64px 16px 20px;
+      }
+      header h1 {
+        font-size: 21px;
+      }
+      header p {
+        font-size: 12.5px;
+        margin-top: 6px;
+      }
+      #theme-toggle, #menu-toggle {
+        top: 14px;
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+      }
+      #theme-toggle { right: 14px; }
+      #menu-toggle { left: 14px; }
+      main {
+        padding: 24px 16px 60px;
+      }
+      .section {
+        margin-bottom: 32px;
+      }
+      .section-title, .section-title-row {
+        font-size: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+      }
+      .search-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #search {
+        max-width: none;
+      }
+      #fav-filter {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+      }
+      #tag-filter {
+        gap: 6px;
+        margin-bottom: 28px;
+      }
+      #tag-filter .tag-btn {
+        padding: 5px 11px;
+        font-size: 11px;
+      }
+      .card {
+        padding: 14px 36px 14px 14px;
+      }
+      .card-name {
+        font-size: 13px;
+      }
+      .card-desc {
+        font-size: 11.5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav id="sidebar"></nav>
+<div id="sidebar-backdrop"></div>
+
+<header>
+  <button id="menu-toggle" title="打开分类菜单" aria-label="打开分类菜单">☰</button>
+  <h1>✨ AI 工具导航</h1>
+  <p>从对话、写作、设计到效率提升 —— 精选好用的 AI 与实用工具，持续整理更新</p>
+  <button id="theme-toggle" title="切换深色模式" aria-label="切换深色模式">🌙</button>
+</header>
+
+<main>
+  <section class="section" id="recommend-section">
+    <div class="section-title-row">
+      <div class="section-title">今日推荐</div>
+      <button id="refresh-recommend" title="换一批">🔀 换一批</button>
+    </div>
+    <div class="grid" id="recommend-grid"></div>
+  </section>
+
+  <div class="search-wrap">
+    <input id="search" type="text" placeholder="搜索工具名称或用途…" autocomplete="off" />
+    <button id="fav-filter" title="只看收藏" aria-label="只看收藏">⭐ 收藏</button>
+  </div>
+
+  <div id="tag-filter"></div>
+
+  <!-- 日常 AI 对话 -->
+  <section class="section" data-section>
+    <div class="section-title">日常 AI 对话</div>
+    <div class="grid">
+      <a class="card" href="https://chat.openai.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">ChatGPT</div>
+        <div class="card-desc">OpenAI 旗舰对话模型，综合能力强</div>
+      </a>
+      <a class="card" href="https://claude.ai" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Claude</div>
+        <div class="card-desc">长文档分析、写作、代码能力均衡</div>
+      </a>
+      <a class="card" href="https://gemini.google.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Gemini</div>
+        <div class="card-desc">Google AI，任何概念一句讲懂</div>
+      </a>
+      <a class="card" href="https://www.doubao.com" target="_blank" rel="noopener" data-tags="免费,中文">
+        <div class="card-name">豆包</div>
+        <div class="card-desc">字节跳动，国内访问快，中文体验好</div>
+      </a>
+      <a class="card" href="https://www.perplexity.ai" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Perplexity</div>
+        <div class="card-desc">查资料附来源，不乱编</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 论文写作 -->
+  <section class="section" data-section>
+    <div class="section-title">论文写作</div>
+    <div class="grid">
+      <a class="card" href="https://www.zotero.org" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Zotero</div>
+        <div class="card-desc">文献管理，浏览器插件一键抓取</div>
+      </a>
+      <a class="card" href="https://www.connectedpapers.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Connected Papers</div>
+        <div class="card-desc">可视化文献关联图，找相关论文</div>
+      </a>
+      <a class="card" href="https://www.semanticscholar.org" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Semantic Scholar</div>
+        <div class="card-desc">免费学术搜索，有 AI 摘要</div>
+      </a>
+      <a class="card" href="https://elicit.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Elicit</div>
+        <div class="card-desc">文献检索与回顾辅助</div>
+      </a>
+      <a class="card" href="https://www.mybib.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">MyBib</div>
+        <div class="card-desc">自动生成引用格式（APA/MLA 等）</div>
+      </a>
+      <a class="card" href="https://www.overleaf.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Overleaf</div>
+        <div class="card-desc">在线 LaTeX 编辑，学术论文排版</div>
+      </a>
+      <a class="card" href="https://scholar.google.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Google Scholar</div>
+        <div class="card-desc">学术搜索基本操作</div>
+      </a>
+      <a class="card" href="https://sci-hub.se" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Sci-Hub</div>
+        <div class="card-desc">下载付费论文（版权灰色地带）</div>
+      </a>
+      <a class="card" href="https://annas-archive.org" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Anna's Archive</div>
+        <div class="card-desc">找电子书、教材 PDF</div>
+      </a>
+      <a class="card" href="https://www.chatpdf.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">ChatPDF</div>
+        <div class="card-desc">上传 PDF 直接对话提问</div>
+      </a>
+      <a class="card" href="https://consensus.app" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Consensus</div>
+        <div class="card-desc">专门搜学术论文的 AI 搜索</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 查重 / 降 AIGC -->
+  <section class="section" data-section>
+    <div class="section-title">查重 / 降 AIGC</div>
+    <div class="grid">
+      <a class="card" href="https://www.cnki.net" target="_blank" rel="noopener" data-tags="付费,中文">
+        <div class="card-name">知网查重</div>
+        <div class="card-desc">国内论文查重主流平台</div>
+      </a>
+      <a class="card" href="https://www.turnitin.com" target="_blank" rel="noopener" data-tags="付费">
+        <div class="card-name">Turnitin</div>
+        <div class="card-desc">英文论文查重主流平台</div>
+      </a>
+      <a class="card" href="https://undetectable.ai" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Undetectable AI</div>
+        <div class="card-desc">降 AIGC 检测率（英文）</div>
+      </a>
+      <a class="card" href="https://biling.ai" target="_blank" rel="noopener" data-tags="付费,中文">
+        <div class="card-name">笔灵</div>
+        <div class="card-desc">国内降 AIGC 工具</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- PPT 与设计 -->
+  <section class="section" data-section>
+    <div class="section-title">PPT 与设计</div>
+    <div class="grid">
+      <a class="card" href="https://gamma.app" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Gamma</div>
+        <div class="card-desc">AI 快速生成 PPT，急交神器</div>
+      </a>
+      <a class="card" href="https://www.canva.com" target="_blank" rel="noopener" data-tags="免费,付费,中文">
+        <div class="card-name">Canva</div>
+        <div class="card-desc">海报 / 简历 / 信息图，模板丰富</div>
+      </a>
+      <a class="card" href="https://slidesgo.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Slidesgo</div>
+        <div class="card-desc">免费 PPT 模板</div>
+      </a>
+      <a class="card" href="https://unsplash.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Unsplash</div>
+        <div class="card-desc">免费高清图片，可商用</div>
+      </a>
+      <a class="card" href="https://www.pexels.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Pexels</div>
+        <div class="card-desc">免费图片 + 视频素材</div>
+      </a>
+      <a class="card" href="https://www.flaticon.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Flaticon</div>
+        <div class="card-desc">免费图标库</div>
+      </a>
+      <a class="card" href="https://ideogram.ai" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Ideogram</div>
+        <div class="card-desc">AI 生成图片，文字渲染准确，免费额度多</div>
+      </a>
+      <a class="card" href="https://firefly.adobe.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Adobe Firefly</div>
+        <div class="card-desc">AI 生图，可商用，学校 Adobe 授权免费</div>
+      </a>
+      <a class="card" href="https://www.midjourney.com" target="_blank" rel="noopener" data-tags="付费,需翻墙">
+        <div class="card-name">Midjourney</div>
+        <div class="card-desc">AI 生图质量最高</div>
+      </a>
+      <a class="card" href="https://tome.app" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Tome</div>
+        <div class="card-desc">另一个 AI 生成 PPT 工具</div>
+      </a>
+      <a class="card" href="https://www.napkin.ai" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Napkin AI</div>
+        <div class="card-desc">文字自动转图表 / 示意图，写报告用</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 学习工具 -->
+  <section class="section" data-section>
+    <div class="section-title">学习工具</div>
+    <div class="grid">
+      <a class="card" href="https://www.khanacademy.org" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Khan Academy</div>
+        <div class="card-desc">免费课程，数学 / 科学 / 经济</div>
+      </a>
+      <a class="card" href="https://www.coursera.org" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Coursera</div>
+        <div class="card-desc">名校公开课，部分可免费旁听</div>
+      </a>
+      <a class="card" href="https://ankiweb.net" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">AnkiWeb</div>
+        <div class="card-desc">间隔重复记忆卡片，备考必备</div>
+      </a>
+      <a class="card" href="https://quizlet.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Quizlet</div>
+        <div class="card-desc">记忆卡片，界面比 Anki 友好</div>
+      </a>
+      <a class="card" href="https://www.wolframalpha.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Wolfram Alpha</div>
+        <div class="card-desc">数学 / 物理计算，能看解题步骤</div>
+      </a>
+      <a class="card" href="https://lightpdf.com" target="_blank" rel="noopener" data-tags="免费,付费,中文">
+        <div class="card-name">LightPDF</div>
+        <div class="card-desc">PDF 转思维导图、AI 摘要</div>
+      </a>
+      <a class="card" href="https://socratic.org" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Socratic</div>
+        <div class="card-desc">拍照解题</div>
+      </a>
+      <a class="card" href="https://speechify.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Speechify</div>
+        <div class="card-desc">文字转语音，可听教材</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 英文写作 -->
+  <section class="section" data-section>
+    <div class="section-title">英文写作</div>
+    <div class="grid">
+      <a class="card" href="https://www.deepl.com/write" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">DeepL Write</div>
+        <div class="card-desc">英文润色</div>
+      </a>
+      <a class="card" href="https://www.grammarly.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Grammarly</div>
+        <div class="card-desc">英文语法检查，浏览器插件方便</div>
+      </a>
+      <a class="card" href="https://ludwig.guru" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Ludwig</div>
+        <div class="card-desc">查某个英文表达是否地道</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 网盘存储 -->
+  <section class="section" data-section>
+    <div class="section-title">网盘存储</div>
+    <div class="grid">
+      <a class="card" href="https://drive.google.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Google Drive</div>
+        <div class="card-desc">免费 15GB，和 Docs 无缝联动</div>
+      </a>
+      <a class="card" href="https://onedrive.live.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">OneDrive</div>
+        <div class="card-desc">免费 5GB，学校邮箱可能有 1TB</div>
+      </a>
+      <a class="card" href="https://mega.nz" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Mega</div>
+        <div class="card-desc">免费 20GB，隐私保护好</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 建站工具 -->
+  <section class="section" data-section>
+    <div class="section-title">建站工具</div>
+    <div class="grid">
+      <a class="card" href="https://www.framer.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Framer</div>
+        <div class="card-desc">无代码建站，拖拽操作，设计感强</div>
+      </a>
+      <a class="card" href="https://tiiny.host" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Tiiny.host</div>
+        <div class="card-desc">拖拽上传 HTML 即得网址，最简单</div>
+      </a>
+      <a class="card" href="https://pages.github.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">GitHub Pages</div>
+        <div class="card-desc">免费静态网页托管</div>
+      </a>
+      <a class="card" href="https://vercel.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Vercel</div>
+        <div class="card-desc">免费部署网站，需要有代码文件</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 效率工具 -->
+  <section class="section" data-section>
+    <div class="section-title">效率工具</div>
+    <div class="grid">
+      <a class="card" href="https://www.notion.so" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Notion</div>
+        <div class="card-desc">笔记 + 项目管理，整理课程资料</div>
+      </a>
+      <a class="card" href="https://todoist.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Todoist</div>
+        <div class="card-desc">任务管理，比备忘录好用</div>
+      </a>
+      <a class="card" href="https://excalidraw.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Excalidraw</div>
+        <div class="card-desc">免费在线白板，画框架图 / 思维导图</div>
+      </a>
+      <a class="card" href="https://toggl.com/track" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Toggl</div>
+        <div class="card-desc">记录每件事花了多少时间</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- PDF 与文件处理 -->
+  <section class="section" data-section>
+    <div class="section-title">PDF 与文件处理</div>
+    <div class="grid">
+      <a class="card" href="https://smallpdf.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Smallpdf</div>
+        <div class="card-desc">PDF 压缩 / 合并 / 转换</div>
+      </a>
+      <a class="card" href="https://www.ilovepdf.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">ILovePDF</div>
+        <div class="card-desc">同上，免费额度更多</div>
+      </a>
+      <a class="card" href="https://www.photopea.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Photopea</div>
+        <div class="card-desc">免费网页版 PS，无需安装</div>
+      </a>
+      <a class="card" href="https://www.remove.bg" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">remove.bg</div>
+        <div class="card-desc">一键抠图</div>
+      </a>
+      <a class="card" href="https://squoosh.app" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Squoosh</div>
+        <div class="card-desc">图片压缩，论文 / PPT 插图必备</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 实用小工具 -->
+  <section class="section" data-section>
+    <div class="section-title">实用小工具</div>
+    <div class="grid">
+      <a class="card" href="https://temp-mail.org" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Temp Mail</div>
+        <div class="card-desc">临时邮箱，注册不想收垃圾邮件的网站</div>
+      </a>
+      <a class="card" href="https://fonts.google.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Google Fonts</div>
+        <div class="card-desc">免费字体，PPT / 网站用</div>
+      </a>
+      <a class="card" href="https://rxresu.me" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Reactive Resume</div>
+        <div class="card-desc">免费简历生成，专业感强</div>
+      </a>
+      <a class="card" href="https://runwayml.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Runway</div>
+        <div class="card-desc">AI 视频特效，影片作业用</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 生活工具 -->
+  <section class="section" data-section>
+    <div class="section-title">生活工具</div>
+    <div class="grid">
+      <a class="card" href="https://www.splitwise.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Splitwise</div>
+        <div class="card-desc">和室友朋友 AA 记账</div>
+      </a>
+      <a class="card" href="https://maps.google.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Google Maps</div>
+        <div class="card-desc">地图导航</div>
+      </a>
+      <a class="card" href="https://www.xe.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">XE Currency</div>
+        <div class="card-desc">实时汇率换算</div>
+      </a>
+      <a class="card" href="https://www.duolingo.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Duolingo</div>
+        <div class="card-desc">免费学外语，碎片时间刷</div>
+      </a>
+      <a class="card" href="https://wise.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Wise</div>
+        <div class="card-desc">国际转账 / 留学汇款，手续费低</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 娱乐与资讯 -->
+  <section class="section" data-section>
+    <div class="section-title">娱乐与资讯</div>
+    <div class="grid">
+      <a class="card" href="https://www.reddit.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Reddit</div>
+        <div class="card-desc">英文最大社区，什么话题都有</div>
+      </a>
+      <a class="card" href="https://news.ycombinator.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Hacker News</div>
+        <div class="card-desc">科技 / 创业资讯聚合</div>
+      </a>
+      <a class="card" href="https://medium.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Medium</div>
+        <div class="card-desc">高质量英文博客，很多行业洞察</div>
+      </a>
+      <a class="card" href="https://www.spotify.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Spotify</div>
+        <div class="card-desc">音乐 / 播客，免费版够用</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 求职简历 -->
+  <section class="section" data-section>
+    <div class="section-title">求职简历</div>
+    <div class="grid">
+      <a class="card" href="https://www.linkedin.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">LinkedIn</div>
+        <div class="card-desc">职业社交，找实习必备</div>
+      </a>
+      <a class="card" href="https://rxresu.me" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Reactive Resume</div>
+        <div class="card-desc">免费简历生成</div>
+      </a>
+      <a class="card" href="https://www.glassdoor.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Glassdoor</div>
+        <div class="card-desc">查公司薪资和面试题</div>
+      </a>
+      <a class="card" href="https://www.levels.fyi" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Levels.fyi</div>
+        <div class="card-desc">科技公司薪资透明数据库</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 开发者工具 -->
+  <section class="section" data-section>
+    <div class="section-title">开发者工具</div>
+    <div class="grid">
+      <a class="card" href="https://github.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">GitHub</div>
+        <div class="card-desc">代码托管，全球最大开源社区</div>
+      </a>
+      <a class="card" href="https://stackoverflow.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Stack Overflow</div>
+        <div class="card-desc">编程问题问答社区</div>
+      </a>
+      <a class="card" href="https://codepen.io" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">CodePen</div>
+        <div class="card-desc">在线写 HTML/CSS/JS 看效果</div>
+      </a>
+      <a class="card" href="https://regex101.com" target="_blank" rel="noopener" data-tags="免费">
+        <div class="card-name">Regex101</div>
+        <div class="card-desc">正则表达式在线测试</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 在线办公 -->
+  <section class="section" data-section>
+    <div class="section-title">在线办公</div>
+    <div class="grid">
+      <a class="card" href="https://docs.google.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Google Docs</div>
+        <div class="card-desc">免费在线文档，替代 Word</div>
+      </a>
+      <a class="card" href="https://sheets.google.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Google Sheets</div>
+        <div class="card-desc">免费在线表格，替代 Excel</div>
+      </a>
+      <a class="card" href="https://www.airtable.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Airtable</div>
+        <div class="card-desc">表格 + 数据库，整理资料很强</div>
+      </a>
+      <a class="card" href="https://miro.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Miro</div>
+        <div class="card-desc">在线协作白板，小组作业用</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- AI 视频图像 -->
+  <section class="section" data-section>
+    <div class="section-title">AI 视频图像</div>
+    <div class="grid">
+      <a class="card" href="https://runwayml.com" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Runway</div>
+        <div class="card-desc">AI 视频特效，影片作业用</div>
+      </a>
+      <a class="card" href="https://www.capcut.com" target="_blank" rel="noopener" data-tags="免费,中文">
+        <div class="card-name">Capcut</div>
+        <div class="card-desc">剪映网页版，剪视频</div>
+      </a>
+      <a class="card" href="https://express.adobe.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Adobe Express</div>
+        <div class="card-desc">快速做图，比 PS 简单</div>
+      </a>
+      <a class="card" href="https://www.krea.ai" target="_blank" rel="noopener" data-tags="免费,付费,需翻墙">
+        <div class="card-name">Krea AI</div>
+        <div class="card-desc">实时 AI 生图，很好玩</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 翻译工具 -->
+  <section class="section" data-section>
+    <div class="section-title">翻译工具</div>
+    <div class="grid">
+      <a class="card" href="https://www.deepl.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">DeepL</div>
+        <div class="card-desc">最准的翻译，学术文章必备</div>
+      </a>
+      <a class="card" href="https://translate.google.com" target="_blank" rel="noopener" data-tags="免费,需翻墙">
+        <div class="card-name">Google Translate</div>
+        <div class="card-desc">多语言翻译</div>
+      </a>
+      <a class="card" href="https://immersivetranslate.com" target="_blank" rel="noopener" data-tags="免费,付费">
+        <div class="card-name">Immersive Translate</div>
+        <div class="card-desc">网页双语对照插件</div>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>© 2026 Cyrilla · AI 工具导航 · 持续更新中</footer>
+
+<script>
+  // ── Safe localStorage (some browsers block it on file:// pages) ──
+  const memoryStore = {};
+  const safeStorage = {
+    getItem(key) {
+      try { return localStorage.getItem(key); } catch (e) { return memoryStore[key] ?? null; }
+    },
+    setItem(key, value) {
+      try { localStorage.setItem(key, value); } catch (e) { memoryStore[key] = value; }
+    },
+  };
+
+  const themeToggle = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  let prefersDark = false;
+  try { prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+  const savedTheme = safeStorage.getItem('theme') || (prefersDark ? 'dark' : 'light');
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '☀️';
+    } else {
+      root.removeAttribute('data-theme');
+      themeToggle.textContent = '🌙';
+    }
+  }
+
+  applyTheme(savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    safeStorage.setItem('theme', next);
+  });
+
+  // ── Favorites ──
+  const FAV_KEY = 'favoriteTools';
+  const favorites = new Set(JSON.parse(safeStorage.getItem(FAV_KEY) || '[]'));
+
+  function saveFavorites() {
+    safeStorage.setItem(FAV_KEY, JSON.stringify([...favorites]));
+  }
+
+  function syncStars(id) {
+    const active = favorites.has(id);
+    document.querySelectorAll(`.star-btn[data-fav-id="${CSS.escape(id)}"]`).forEach(star => {
+      star.classList.toggle('active', active);
+      star.textContent = active ? '★' : '☆';
+    });
+  }
+
+  function addStar(card) {
+    const id = card.getAttribute('href');
+    const star = document.createElement('button');
+    star.className = 'star-btn';
+    star.type = 'button';
+    star.title = '收藏';
+    star.setAttribute('aria-label', '收藏');
+    star.dataset.favId = id;
+    star.textContent = favorites.has(id) ? '★' : '☆';
+    if (favorites.has(id)) star.classList.add('active');
+
+    star.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (favorites.has(id)) {
+        favorites.delete(id);
+      } else {
+        favorites.add(id);
+      }
+      saveFavorites();
+      syncStars(id);
+      if (favFilter.classList.contains('active')) applyFilters();
+    });
+
+    card.appendChild(star);
+  }
+
+  document.querySelectorAll('.card').forEach(addStar);
+
+  // ── Tags ──
+  function getTags(card) {
+    const raw = card.dataset.tags;
+    return raw ? raw.split(',').map(t => t.trim()).filter(Boolean) : [];
+  }
+
+  function addTagBadges(card) {
+    const tagList = getTags(card);
+    if (!tagList.length) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'card-tags';
+    tagList.forEach(tag => {
+      const span = document.createElement('span');
+      span.className = 'tag';
+      span.textContent = tag;
+      wrap.appendChild(span);
+    });
+    card.appendChild(wrap);
+  }
+
+  document.querySelectorAll('.card[data-tags]').forEach(addTagBadges);
+
+  // ── Search + favorite + tag filter ──
+  const input = document.getElementById('search');
+  const favFilter = document.getElementById('fav-filter');
+  const tagFilter = document.getElementById('tag-filter');
+  const activeTags = new Set();
+
+  const allTagNames = new Set();
+  document.querySelectorAll('[data-section] .card[data-tags]').forEach(card => {
+    getTags(card).forEach(tag => allTagNames.add(tag));
+  });
+
+  allTagNames.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tag-btn';
+    btn.textContent = tag;
+    btn.addEventListener('click', () => {
+      if (activeTags.has(tag)) {
+        activeTags.delete(tag);
+        btn.classList.remove('active');
+      } else {
+        activeTags.add(tag);
+        btn.classList.add('active');
+      }
+      applyFilters();
+    });
+    tagFilter.appendChild(btn);
+  });
+
+  function applyFilters() {
+    const q = input.value.trim().toLowerCase();
+    const onlyFav = favFilter.classList.contains('active');
+    document.querySelectorAll('[data-section]').forEach(section => {
+      let anyVisible = false;
+      section.querySelectorAll('.card').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const matchesQuery = !q || text.includes(q);
+        const matchesFav = !onlyFav || favorites.has(card.getAttribute('href'));
+        const cardTags = getTags(card);
+        const matchesTags = activeTags.size === 0 || [...activeTags].every(t => cardTags.includes(t));
+        const show = matchesQuery && matchesFav && matchesTags;
+        card.classList.toggle('hidden', !show);
+        if (show) anyVisible = true;
+      });
+      section.classList.toggle('hidden', !anyVisible);
+    });
+  }
+
+  input.addEventListener('input', applyFilters);
+  favFilter.addEventListener('click', () => {
+    favFilter.classList.toggle('active');
+    applyFilters();
+  });
+
+  // ── 今日推荐 ──
+  const allTools = [...document.querySelectorAll('main > [data-section] .card')].map(card => ({
+    href: card.getAttribute('href'),
+    name: card.querySelector('.card-name').textContent,
+    desc: card.querySelector('.card-desc').textContent,
+    tags: card.dataset.tags || '',
+  }));
+
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function dateSeed() {
+    const d = new Date();
+    const str = `${d.getFullYear()}${d.getMonth() + 1}${d.getDate()}`;
+    let seed = 0;
+    for (const ch of str) seed = (seed * 31 + ch.charCodeAt(0)) | 0;
+    return seed;
+  }
+
+  function pickRandom(rand, count) {
+    const indices = [...allTools.keys()];
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    return indices.slice(0, count).map(i => allTools[i]);
+  }
+
+  const recommendGrid = document.getElementById('recommend-grid');
+  const refreshBtn = document.getElementById('refresh-recommend');
+
+  function renderRecommend(items) {
+    recommendGrid.innerHTML = '';
+    items.forEach(tool => {
+      const card = document.createElement('a');
+      card.className = 'card';
+      card.href = tool.href;
+      card.target = '_blank';
+      card.rel = 'noopener';
+
+      const name = document.createElement('div');
+      name.className = 'card-name';
+      name.textContent = tool.name;
+
+      const desc = document.createElement('div');
+      desc.className = 'card-desc';
+      desc.textContent = tool.desc;
+
+      card.appendChild(name);
+      card.appendChild(desc);
+      if (tool.tags) {
+        card.dataset.tags = tool.tags;
+        addTagBadges(card);
+      }
+      addStar(card);
+      recommendGrid.appendChild(card);
+    });
+  }
+
+  renderRecommend(pickRandom(mulberry32(dateSeed()), 3));
+
+  refreshBtn.addEventListener('click', () => {
+    renderRecommend(pickRandom(Math.random, 3));
+  });
+
+  // ── Category icons ──
+  const CATEGORY_ICONS = {
+    '今日推荐': { icon: '🎯', color: '#f59e0b' },
+    '日常 AI 对话': { icon: '💬', color: '#6366f1' },
+    '论文写作': { icon: '📚', color: '#0ea5e9' },
+    '查重 / 降 AIGC': { icon: '🛡️', color: '#ef4444' },
+    'PPT 与设计': { icon: '🎨', color: '#ec4899' },
+    '学习工具': { icon: '🎓', color: '#14b8a6' },
+    '英文写作': { icon: '✍️', color: '#8b5cf6' },
+    '网盘存储': { icon: '☁️', color: '#3b82f6' },
+    '建站工具': { icon: '🌐', color: '#10b981' },
+    '效率工具': { icon: '⚡', color: '#eab308' },
+    'PDF 与文件处理': { icon: '📄', color: '#f97316' },
+    '实用小工具': { icon: '🧰', color: '#64748b' },
+    '生活工具': { icon: '🏠', color: '#22c55e' },
+    '娱乐与资讯': { icon: '🎵', color: '#d946ef' },
+    '求职简历': { icon: '💼', color: '#0891b2' },
+    '开发者工具': { icon: '💻', color: '#475569' },
+    '在线办公': { icon: '🗂️', color: '#06b6d4' },
+    'AI 视频图像': { icon: '🎬', color: '#a855f7' },
+    '翻译工具': { icon: '🌍', color: '#84cc16' },
+  };
+
+  function makeCatIcon(title) {
+    const info = CATEGORY_ICONS[title];
+    if (!info) return null;
+    const span = document.createElement('span');
+    span.className = 'cat-icon';
+    span.style.setProperty('--cat-color', info.color);
+    span.textContent = info.icon;
+    return span;
+  }
+
+  document.querySelectorAll('.section-title').forEach(titleEl => {
+    const title = titleEl.textContent.trim();
+    titleEl.dataset.title = title;
+    const icon = makeCatIcon(title);
+    if (icon) titleEl.prepend(icon);
+  });
+
+  // ── Collapse / expand sections ──
+  document.querySelectorAll('.section').forEach(section => {
+    const titleEl = section.querySelector('.section-title');
+    const grid = section.querySelector('.grid');
+    if (!titleEl || !grid) return;
+
+    let row = titleEl.parentElement;
+    if (!row.classList.contains('section-title-row')) {
+      row = document.createElement('div');
+      row.className = 'section-title-row';
+      titleEl.parentElement.insertBefore(row, titleEl);
+      row.appendChild(titleEl);
+    }
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.className = 'collapse-btn';
+    toggleBtn.title = '收起/展开';
+    toggleBtn.setAttribute('aria-label', '收起/展开');
+    toggleBtn.innerHTML = '<span class="arrow">▾</span>';
+    toggleBtn.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
+    row.appendChild(toggleBtn);
+  });
+
+  // ── Sidebar nav ──
+  const sidebar = document.getElementById('sidebar');
+  document.querySelectorAll('main > [data-section]').forEach((section, i) => {
+    const title = section.querySelector('.section-title').dataset.title;
+    const id = `section-${i}`;
+    section.id = id;
+
+    const link = document.createElement('a');
+    link.href = `#${id}`;
+    const icon = makeCatIcon(title);
+    if (icon) link.appendChild(icon);
+    link.appendChild(document.createTextNode(title));
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      section.classList.remove('collapsed');
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      closeSidebar();
+    });
+    sidebar.appendChild(link);
+  });
+
+  const sidebarLinks = [...sidebar.querySelectorAll('a')];
+  const sections = [...document.querySelectorAll('main > [data-section]')];
+
+  function highlightSidebar() {
+    let current = sections[0];
+    for (const section of sections) {
+      if (section.getBoundingClientRect().top - 100 <= 0) current = section;
+    }
+    sidebarLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === `#${current.id}`);
+    });
+  }
+
+  window.addEventListener('scroll', highlightSidebar);
+  highlightSidebar();
+
+  // ── Mobile menu toggle ──
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebarBackdrop.classList.remove('open');
+  }
+
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    sidebarBackdrop.classList.toggle('open');
+  });
+  sidebarBackdrop.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>
