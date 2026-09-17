@@ -1,6 +1,6 @@
 # GitHub Settings Checklist
 
-This file records GitHub presentation and repository settings that live outside normal repository files. The connected GitHub tools can inspect these values but cannot currently edit repository About metadata, archive repositories, change the default branch, delete branches, manage profile pins, or edit GitHub Release metadata directly.
+This file records GitHub presentation and repository settings that live outside normal repository files. The connected GitHub tools can inspect these values but cannot currently edit repository About metadata, archive repositories, change the default branch, delete branches, manage profile pins, edit GitHub Release metadata, or change repository feature toggles such as Issues, Projects, Wiki, and Discussions directly.
 
 Last reviewed: **September 17, 2026**.
 
@@ -31,6 +31,69 @@ Do not use primary pin space for competition snapshots, demo fixtures, or earlie
 | `prism-ai` | earlier experiment | description/topics missing | blank | keep visually secondary |
 | `nexus-atlas-datahub-2026` | competition snapshot | **stale description** | missing | archive after confirming historical Pages demo should remain |
 | `statewake-demo-project` | controlled evidence fixture | description/topics missing | not needed | do **not** archive while STATEWAKE uses it as evidence |
+
+## Repository Feature Toggles
+
+All ten public repositories were audited on September 17, 2026.
+
+Current shared state:
+
+```text
+Projects     ON  on all 10 public repositories
+Wiki         ON  on all 10 public repositories
+Discussions  OFF on all 10 public repositories
+```
+
+Projects and Wiki appear to be default-enabled repository surface area rather than part of the documented product workflows. The connected GitHub tools cannot change these toggles directly, so the recommendations below are **manual settings actions**, not completed changes.
+
+| Repository | Issues | Projects | Wiki | Discussions | Recommendation |
+| --- | --- | --- | --- | --- | --- |
+| `sideglance` | ON, no issue history | ON | ON | OFF | keep Issues; turn Projects/Wiki off; leave Discussions off |
+| `statewake` | ON, no issue history | ON | ON | OFF | keep Issues as deployed-product feedback; turn Projects/Wiki off; leave Discussions off |
+| `nexus-ai` | ON, real issue history | ON | ON | OFF | keep Issues; turn Projects/Wiki off; leave Discussions off |
+| `english-radar` | ON, no issue history | ON | ON | OFF | keep Issues for maintenance bugs; turn Projects/Wiki off; leave Discussions off |
+| `verity` | ON, no issue history | ON | ON | OFF | keep Issues for maintained-product bugs; turn Projects/Wiki off; leave Discussions off |
+| `portfolio` | ON, no issue history | ON | ON | OFF | turn Issues/Projects/Wiki off; leave Discussions off |
+| `inkraft` | ON, no issue history | ON | ON | OFF | turn Issues/Projects/Wiki off; leave Discussions off |
+| `prism-ai` | ON, no issue history | ON | ON | OFF | turn Issues/Projects/Wiki off; leave Discussions off |
+| `nexus-atlas-datahub-2026` | ON, no issue history | ON | ON | OFF | turn Issues/Projects/Wiki off; leave Discussions off |
+| `statewake-demo-project` | ON, Issue #1 intentionally open | ON | ON | OFF | **keep Issues**; turn Projects/Wiki off; leave Discussions off |
+
+### Why Issues are not treated uniformly
+
+The current product repositories may benefit from a lightweight public bug / feedback entry even if Issues have not yet been used. Keeping Issues enabled does not require introducing a full public roadmap or GitHub Projects workflow.
+
+`nexus-ai` already has real historical issue usage, including the long-term Nexus Atlas / Verity vertical-slice implementation issue. Its Issues tab is therefore part of genuine engineering history rather than an empty default surface.
+
+`statewake-demo-project` is the important exception among supporting repositories: Issue #1 is deliberately part of the controlled demo evidence. Do not disable Issues or close that issue merely for visual cleanliness while the STATEWAKE demo still depends on it.
+
+For `portfolio`, `inkraft`, `prism-ai`, and the frozen DataHub competition snapshot, an empty Issues tab adds little value and can be disabled if no public-support workflow is intended.
+
+### Manual toggle target
+
+The clean target state is:
+
+```text
+CURRENT / MAINTAINED PRODUCTS
+sideglance       Issues ON   Projects OFF   Wiki OFF   Discussions OFF
+statewake        Issues ON   Projects OFF   Wiki OFF   Discussions OFF
+nexus-ai         Issues ON   Projects OFF   Wiki OFF   Discussions OFF
+english-radar    Issues ON   Projects OFF   Wiki OFF   Discussions OFF
+verity           Issues ON   Projects OFF   Wiki OFF   Discussions OFF
+
+PUBLIC HUB / EARLIER / SNAPSHOT
+portfolio        Issues OFF  Projects OFF   Wiki OFF   Discussions OFF
+inkraft          Issues OFF  Projects OFF   Wiki OFF   Discussions OFF
+prism-ai         Issues OFF  Projects OFF   Wiki OFF   Discussions OFF
+nexus-atlas-datahub-2026
+                 Issues OFF  Projects OFF   Wiki OFF   Discussions OFF
+
+DEMO EVIDENCE
+statewake-demo-project
+                 Issues ON   Projects OFF   Wiki OFF   Discussions OFF
+```
+
+Do not enable Discussions merely to make the repository navigation look fuller. None of the current projects has a community-discussion workflow that requires it.
 
 ## Exact About Values
 
@@ -387,4 +450,6 @@ Keep these rules:
 - do not archive evidence repositories that an active demo still reads;
 - do not delete a branch with `ahead_by > 0` without reviewing its unique work;
 - keep competition snapshots clearly separated from canonical long-term repositories;
-- review profile pins, About metadata, homepage links, topics, default branches, archived state, Pages links, tags, and releases every few months.
+- turn off unused Projects / Wiki surfaces rather than leaving empty default tabs enabled;
+- preserve Issues when they serve current-product feedback or controlled demo evidence;
+- review profile pins, About metadata, homepage links, topics, default branches, archived state, Pages links, feature toggles, tags, and releases every few months.
