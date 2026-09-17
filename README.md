@@ -28,10 +28,10 @@ Personal intelligence infrastructure for restoring project context, tracing deci
 
 ### English Radar
 
-A local-first learning system for real internet English, organized around context, tone, usage boundaries, pronunciation, and personal mastery. The standalone product is now in maintenance and acts as the main learning-system foundation for future Sideglance Radar work.
+A local-first learning system for real internet English, organized around context, tone, usage boundaries, pronunciation, and personal mastery. `v1.8.3` is the stable standalone maintenance line. The repository's current `main` branch and GitHub Pages site now host a Sideglance Radar migration preview built from that learning-system foundation; this does not mean the Sideglance and English Radar repositories have been physically merged.
 
-- [Live site](https://cyrilla-mist.github.io/english-radar/)
 - [Repository](https://github.com/cyrilla-mist/english-radar)
+- [Current Radar preview](https://cyrilla-mist.github.io/english-radar/)
 
 ### Verity
 
