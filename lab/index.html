@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Cyrilla's Web Lab — small browser tools and interface experiments." />
+  <title>Cyrilla · Web Lab</title>
+  <style>
+    :root {
+      --bg: #f7f5fb;
+      --card: #ffffff;
+      --text: #2b2438;
+      --muted: #756b85;
+      --primary: #7c5cff;
+      --primary-light: #a78bfa;
+      --border: rgba(124, 92, 255, .14);
+      --shadow: rgba(77, 55, 126, .10);
+    }
+    [data-theme="dark"] {
+      --bg: #15111e;
+      --card: #1e1929;
+      --text: #f0ebfa;
+      --muted: #afa5bd;
+      --primary: #a78bfa;
+      --primary-light: #c4b5fd;
+      --border: rgba(167, 139, 250, .18);
+      --shadow: rgba(0, 0, 0, .22);
+    }
+    * { box-sizing: border-box; }
+    html { color-scheme: light dark; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 90% 0%, rgba(167,139,250,.20), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: inherit; }
+    .wrap { width: min(940px, calc(100% - 40px)); margin: 0 auto; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 26px 0; }
+    .back { text-decoration: none; color: var(--muted); font-weight: 650; }
+    .back:hover { color: var(--primary); }
+    button {
+      width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border);
+      background: var(--card); color: var(--text); cursor: pointer; font-size: 18px;
+    }
+    header { padding: 74px 0 42px; }
+    .eyebrow { color: var(--primary); font-weight: 750; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; }
+    h1 { font-size: clamp(44px, 9vw, 82px); line-height: .98; margin: 14px 0 22px; letter-spacing: -.05em; }
+    .lead { max-width: 680px; color: var(--muted); font-size: clamp(17px, 2.4vw, 21px); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 28px 0 80px; }
+    .card {
+      display: block; text-decoration: none; background: var(--card); border: 1px solid var(--border);
+      border-radius: 22px; padding: 28px; box-shadow: 0 12px 34px var(--shadow);
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    .card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .kicker { color: var(--primary); font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: .12em; }
+    h2 { margin: 10px 0 9px; font-size: 24px; }
+    .card p { color: var(--muted); margin: 0 0 24px; }
+    .open { color: var(--primary); font-weight: 750; }
+    footer { border-top: 1px solid var(--border); padding: 30px 0 48px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } header { padding-top: 48px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="back" href="../">← Portfolio</a>
+      <button id="themeToggle" aria-label="Toggle color theme">☾</button>
+    </nav>
+
+    <header>
+      <div class="eyebrow">Small tools · browser experiments</div>
+      <h1>Web Lab</h1>
+      <p class="lead">A shelf for lightweight utilities and interface experiments that are useful enough to keep, but do not need their own standalone product repository.</p>
+    </header>
+
+    <main class="grid">
+      <a class="card" href="../prompt-tools.html">
+        <div class="kicker">Productivity</div>
+        <h2>Prompt Builder</h2>
+        <p>Turn reusable prompt templates into structured prompts by filling in topic, length, tone, format, and other variables.</p>
+        <span class="open">Open tool →</span>
+      </a>
+
+      <a class="card" href="../ai-tools.html">
+        <div class="kicker">Directory</div>
+        <h2>AI Tools Directory</h2>
+        <p>Browse and filter a compact directory of AI and productivity tools by category, tags, search, and favorites.</p>
+        <span class="open">Open tool →</span>
+      </a>
+
+      <a class="card" href="../color-palette.html">
+        <div class="kicker">Design</div>
+        <h2>Color Palette Generator</h2>
+        <p>Generate complementary, analogous, and triadic palettes from a base color, with scales and interface previews.</p>
+        <span class="open">Open tool →</span>
+      </a>
+
+      <a class="card" href="../gradient-generator.html">
+        <div class="kicker">Design</div>
+        <h2>Gradient Generator</h2>
+        <p>Create linear, radial, conic, and patterned gradients, preview them full screen, and copy the resulting CSS.</p>
+        <span class="open">Open tool →</span>
+      </a>
+    </main>
+
+    <footer>© 2026 Cyrilla · Web Lab</footer>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('cyrilla-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) root.dataset.theme = 'dark';
+
+    function syncIcon() {
+      toggle.textContent = root.dataset.theme === 'dark' ? '☀' : '☾';
+    }
+    syncIcon();
+
+    toggle.addEventListener('click', () => {
+      root.dataset.theme = root.dataset.theme === 'dark' ? '' : 'dark';
+      localStorage.setItem('cyrilla-theme', root.dataset.theme === 'dark' ? 'dark' : 'light');
+      syncIcon();
+    });
+  </script>
+</body>
+</html>
