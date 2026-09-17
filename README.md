@@ -2,7 +2,7 @@
 
 A curated home for my selected products, earlier AI experiments, and small web tools.
 
-[View the portfolio](https://cyrilla-mist.github.io/portfolio/) · [Public repository map](docs/repository-map.md)
+[View the portfolio](https://cyrilla-mist.github.io/portfolio/) · [Public repository map](docs/repository-map.md) · [Maintenance docs](docs/README.md)
 
 ## Selected Products
 
@@ -78,12 +78,13 @@ This repository is the public presentation layer for my work.
 - Larger products keep independent repositories, architecture, tests, and release history.
 - Small static utilities go into `lab/`.
 - Earlier standalone experiments are indexed in `experiments/`.
-- Repository roles and maintenance rules are documented in [`docs/repository-map.md`](docs/repository-map.md).
+- Cross-repository presentation and maintenance rules live in `docs/`.
 
 ```text
 portfolio/
 ├── index.html
 ├── lab/
+│   ├── README.md
 │   ├── index.html
 │   ├── prompt-builder/index.html
 │   ├── ai-tools/index.html
@@ -94,7 +95,10 @@ portfolio/
 │   ├── inkraft/README.md
 │   └── prism-ai/README.md
 ├── docs/
-│   └── repository-map.md
+│   ├── README.md
+│   ├── repository-map.md
+│   ├── github-settings-checklist.md
+│   └── github-profile-readme.md
 ├── prompt-tools.html         legacy redirect
 ├── ai-tools.html             legacy redirect
 ├── color-palette.html        legacy redirect
