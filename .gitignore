@@ -1,0 +1,19 @@
+# Environment / local secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# Dependencies / generated output
+node_modules/
+dist/
+
+# Local tooling / editors
+.claude/
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
