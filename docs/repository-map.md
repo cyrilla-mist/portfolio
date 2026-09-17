@@ -11,8 +11,10 @@ These repositories represent products that are current, strategically important,
 | [`sideglance`](https://github.com/cyrilla-mist/sideglance) | Internet context intelligence; Decode is the current release and Radar / Archive are the long-term product direction | Current product |
 | [`statewake`](https://github.com/cyrilla-mist/statewake) | Interrupted-work recovery agent built around Validate before Recover | Completed deployed project; post-hackathon |
 | [`nexus-ai`](https://github.com/cyrilla-mist/nexus-ai) | Canonical long-term Nexus Atlas repository | Long-term experimental product |
-| [`english-radar`](https://github.com/cyrilla-mist/english-radar) | Local-first real-internet-English learning system; foundation for future Sideglance Radar | Maintenance |
+| [`english-radar`](https://github.com/cyrilla-mist/english-radar) | Stable standalone learning line at `v1.8.3`; current `main` / Pages host a Sideglance Radar migration preview built from that foundation | Maintenance + migration host |
 | [`verity`](https://github.com/cyrilla-mist/verity) | AI-assisted project-material quality and review tool | Independent product |
+
+The `english-radar` repository currently serves two clearly separated roles: the `v1.x` release line preserves the standalone English Radar product, while `main` contains the current Sideglance Radar preview. This is migration hosting, not a claim that the Sideglance and English Radar repositories have been physically merged.
 
 ## 2. Portfolio and Small Web Work
 
@@ -131,6 +133,7 @@ Avoid ambiguous wording such as `pending`, `candidate`, `not frozen`, or `coming
 When reviewing the GitHub account:
 
 - confirm the README describes the repository's current role;
+- distinguish stable release lines from preview work on the default branch when they differ;
 - remove expired submission language;
 - verify live links and canonical-repository links;
 - keep small utilities consolidated;
