@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Cyrilla's Web Lab — small browser tools and interface experiments." />
+  <meta name="description" content="Cyrilla's Web Lab — small browser tools, interface experiments, and preserved legacy AI prototypes." />
   <title>Cyrilla · Web Lab</title>
   <style>
     :root {
@@ -51,7 +51,12 @@
     .eyebrow { color: var(--primary); font-weight: 750; letter-spacing: .14em; text-transform: uppercase; font-size: 12px; }
     h1 { font-size: clamp(44px, 9vw, 82px); line-height: .98; margin: 14px 0 22px; letter-spacing: -.05em; }
     .lead { max-width: 680px; color: var(--muted); font-size: clamp(17px, 2.4vw, 21px); }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 28px 0 80px; }
+    .section { padding: 26px 0 18px; }
+    .section + .section { border-top: 1px solid var(--border); }
+    .section-head { margin-bottom: 20px; }
+    .section-head h2 { margin: 6px 0 4px; font-size: 30px; letter-spacing: -.025em; }
+    .section-head p { margin: 0; color: var(--muted); max-width: 700px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 8px 0 52px; }
     .card {
       display: block; text-decoration: none; background: var(--card); border: 1px solid var(--border);
       border-radius: 22px; padding: 28px; box-shadow: 0 12px 34px var(--shadow);
@@ -59,9 +64,10 @@
     }
     .card:hover { transform: translateY(-4px); border-color: var(--primary); }
     .kicker { color: var(--primary); font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: .12em; }
-    h2 { margin: 10px 0 9px; font-size: 24px; }
+    .card h3 { margin: 10px 0 9px; font-size: 24px; }
     .card p { color: var(--muted); margin: 0 0 24px; }
     .open { color: var(--primary); font-weight: 750; }
+    .legacy-note { font-size: 13px; color: var(--muted); margin-top: 10px; }
     footer { border-top: 1px solid var(--border); padding: 30px 0 48px; color: var(--muted); font-size: 14px; }
     @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } header { padding-top: 48px; } }
   </style>
@@ -76,37 +82,71 @@
     <header>
       <div class="eyebrow">Small tools · browser experiments</div>
       <h1>Web Lab</h1>
-      <p class="lead">A shelf for lightweight utilities and interface experiments that are useful enough to keep, but do not need their own standalone product repository.</p>
+      <p class="lead">A shelf for lightweight utilities and preserved experiments that are useful enough to keep, but do not need to compete with the main product repositories.</p>
     </header>
 
-    <main class="grid">
-      <a class="card" href="prompt-builder/">
-        <div class="kicker">Productivity</div>
-        <h2>Prompt Builder</h2>
-        <p>Turn reusable prompt templates into structured prompts by filling in topic, length, tone, format, and other variables.</p>
-        <span class="open">Open tool →</span>
-      </a>
+    <main>
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Utilities</div>
+          <h2>Small browser tools</h2>
+          <p>These tools live directly inside the Portfolio repository and use directory-based URLs.</p>
+        </div>
+        <div class="grid">
+          <a class="card" href="prompt-builder/">
+            <div class="kicker">Productivity</div>
+            <h3>Prompt Builder</h3>
+            <p>Turn reusable prompt templates into structured prompts by filling in topic, length, tone, format, and other variables.</p>
+            <span class="open">Open tool →</span>
+          </a>
 
-      <a class="card" href="ai-tools/">
-        <div class="kicker">Directory</div>
-        <h2>AI Tools Directory</h2>
-        <p>Browse and filter a compact directory of AI and productivity tools by category, tags, search, and favorites.</p>
-        <span class="open">Open tool →</span>
-      </a>
+          <a class="card" href="ai-tools/">
+            <div class="kicker">Directory</div>
+            <h3>AI Tools Directory</h3>
+            <p>Browse and filter a compact directory of AI and productivity tools by category, tags, search, and favorites.</p>
+            <span class="open">Open tool →</span>
+          </a>
 
-      <a class="card" href="color-palette/">
-        <div class="kicker">Design</div>
-        <h2>Color Palette Generator</h2>
-        <p>Generate complementary, analogous, and triadic palettes from a base color, with scales and interface previews.</p>
-        <span class="open">Open tool →</span>
-      </a>
+          <a class="card" href="color-palette/">
+            <div class="kicker">Design</div>
+            <h3>Color Palette Generator</h3>
+            <p>Generate complementary, analogous, and triadic palettes from a base color, with scales and interface previews.</p>
+            <span class="open">Open tool →</span>
+          </a>
 
-      <a class="card" href="gradient-generator/">
-        <div class="kicker">Design</div>
-        <h2>Gradient Generator</h2>
-        <p>Create linear, radial, conic, and patterned gradients, preview them full screen, and copy the resulting CSS.</p>
-        <span class="open">Open tool →</span>
-      </a>
+          <a class="card" href="gradient-generator/">
+            <div class="kicker">Design</div>
+            <h3>Gradient Generator</h3>
+            <p>Create linear, radial, conic, and patterned gradients, preview them full screen, and copy the resulting CSS.</p>
+            <span class="open">Open tool →</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="eyebrow">Legacy AI</div>
+          <h2>Earlier AI experiments</h2>
+          <p>Standalone prototypes from an earlier phase. Their original repositories remain public for code history and provenance, but they are no longer treated as current flagship products.</p>
+        </div>
+        <div class="grid">
+          <a class="card" href="https://cyrilla-mist.github.io/inkraft/" target="_blank" rel="noopener noreferrer">
+            <div class="kicker">Writing · Legacy experiment</div>
+            <h3>Inkraft</h3>
+            <p>An AI-assisted Chinese academic-writing prototype exploring review, paraphrasing, polishing, abstracts, translation, and reference formatting.</p>
+            <span class="open">Open preserved demo ↗</span>
+            <div class="legacy-note">Source history: github.com/cyrilla-mist/inkraft</div>
+          </a>
+
+          <a class="card" href="https://cyrilla-mist.github.io/prism-ai/" target="_blank" rel="noopener noreferrer">
+            <div class="kicker">Review · Legacy experiment</div>
+            <h3>PrismAI</h3>
+            <p>An earlier multi-role AI review prototype that compares perspectives and turns feedback into prioritized revision actions.</p>
+            <span class="open">Open preserved demo ↗</span>
+            <div class="legacy-note">Source history: github.com/cyrilla-mist/prism-ai</div>
+          </a>
+        </div>
+      </section>
     </main>
 
     <footer>© 2026 Cyrilla · Web Lab</footer>
